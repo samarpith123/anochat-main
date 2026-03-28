@@ -152,6 +152,10 @@ export default function LandingPage() {
               {joinMutation.isPending ? "Connecting..." : "Enter Chat"}
               {!joinMutation.isPending && <ArrowRight className="w-5 h-5" />}
             </button>
+
+            <p className="text-xs text-muted-foreground text-center leading-relaxed pt-1">
+              By using this site, you agree to follow the <span className="text-foreground/70 font-medium">IT Rules 2026</span>. Sharing illegal synthetic content (deepfakes) or harassment will result in a permanent ban and may be reported to <span className="text-foreground/70 font-medium">I4C authorities</span>.
+            </p>
           </form>
         </div>
       </motion.div>
