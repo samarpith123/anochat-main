@@ -1,15 +1,18 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Anonymous Chat API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: users
+    description: User operations
+  - name: messages
+    description: Message operations
 paths:
   /healthz:
     get:
@@ -24,6 +27,104 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /users/join:
+    post:
+      operationId: joinChat
+      tags: [users]
+      summary: Join chat with a username and gender
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JoinRequest"
+      responses:
+        "200":
+          description: Joined successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JoinResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Username taken
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users/online:
+    get:
+      operationId: getOnlineUsers
+      tags: [users]
+      summary: Get all online users
+      parameters:
+        - in: query
+          name: gender
+          schema:
+            type: string
+            enum: [Male, Female, all]
+          required: false
+          description: Filter by gender
+      responses:
+        "200":
+          description: List of online users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnlineUsersResponse"
+
+  /messages/{sessionId}:
+    get:
+      operationId: getMessages
+      tags: [messages]
+      summary: Get messages for a conversation
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+          description: Unique chat session ID (sorted combination of two user IDs)
+      responses:
+        "200":
+          description: Messages for the conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessagesResponse"
+
+  /messages:
+    post:
+      operationId: sendMessage
+      tags: [messages]
+      summary: Send a message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageRequest"
+      responses:
+        "200":
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +135,127 @@ components:
       required:
         - status
 
+    JoinRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 20
+          minLength: 1
+        gender:
+          type: string
+          enum: [Male, Female]
+      required:
+        - username
+        - gender
+
+    JoinResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+        username:
+          type: string
+        gender:
+          type: string
+      required:
+        - userId
+        - username
+        - gender
+
+    OnlineUser:
+      type: object
+      properties:
+        userId:
+          type: string
+        username:
+          type: string
+        gender:
+          type: string
+        joinedAt:
+          type: string
+          format: date-time
+      required:
+        - userId
+        - username
+        - gender
+        - joinedAt
+
+    OnlineUsersResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/OnlineUser"
+        total:
+          type: integer
+      required:
+        - users
+        - total
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+        sessionId:
+          type: string
+        fromUserId:
+          type: string
+        toUserId:
+          type: string
+        fromUsername:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - sessionId
+        - fromUserId
+        - toUserId
+        - fromUsername
+        - content
+        - createdAt
+
+    MessagesResponse:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+      required:
+        - messages
+
+    SendMessageRequest:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        fromUserId:
+          type: string
+        toUserId:
+          type: string
+        fromUsername:
+          type: string
+        content:
+          type: string
+          maxLength: 1000
+      required:
+        - sessionId
+        - fromUserId
+        - toUserId
+        - fromUsername
+        - content
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error

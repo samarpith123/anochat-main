@@ -1,0 +1,16 @@
+packages:
+  "socket.io-client": "Real-time bidirectional event-based communication for chat"
+  "framer-motion": "Smooth entry animations, layout transitions, and gesture effects"
+  "date-fns": "Human-readable date and time formatting for messages"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility for intelligently merging tailwind classes"
+
+images:
+  - path: "artifacts/chat-app/public/images/hero-bg.png"
+    description: "Dark, abstract, sleek gradient mesh with deep navy, slate, and vibrant neon purple light leaks. Very professional, modern tech aesthetic suitable for a high-end chat app background"
+    aspect_ratio: "16:9"
+
+notes:
+  - Connect socket.io to the root path '/'
+  - Use sessionStorage to persist the user's generated identity
+  - Expect the generated API client at @workspace/api-client-react
