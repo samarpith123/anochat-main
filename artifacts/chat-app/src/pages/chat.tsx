@@ -6,7 +6,7 @@ import { useGetMessages, useSendMessage, useGetOnlineUsers } from "@workspace/ap
 import { Layout } from "@/components/Layout";
 import { generateSessionId, cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { Send, ArrowLeft, Loader2 } from "lucide-react";
+import { Send, ArrowLeft, Loader2, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function ChatPage() {
