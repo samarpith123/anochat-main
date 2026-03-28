@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation, useParams, Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useChatSocket } from "@/hooks/use-chat-socket";
-import { useGetMessages, useSendMessage, useGetOnlineUsers } from "@workspace/api-client-react";
+import { useGetMessages, useGetOnlineUsers } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { generateSessionId, cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -43,8 +43,6 @@ export default function ChatPage() {
     query: { enabled: !!sessionId }
   });
 
-  const sendMutation = useSendMessage();
-
   // Auto-scroll to bottom
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -70,15 +68,11 @@ export default function ChatPage() {
         content
       };
 
-      // 1. Save via REST API
-      const savedMessage = await sendMutation.mutateAsync({ data: payload });
-      
-      // 2. Emit real-time event to ensure partner gets it immediately
+      // Send only via socket — server saves to DB and broadcasts message:new to all clients
       emitMessage(payload);
 
     } catch (err) {
       console.error("Failed to send message:", err);
-      // Could add toast notification here
     }
   };
 
@@ -198,7 +192,7 @@ export default function ChatPage() {
               />
               <button
                 type="submit"
-                disabled={!messageText.trim() || sendMutation.isPending}
+                disabled={!messageText.trim()}
                 className="absolute right-2 bottom-2 p-2.5 bg-primary text-white rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:hover:bg-primary transition-colors shadow-md shadow-primary/20"
               >
                 <Send className="w-4 h-4 ml-0.5" />
