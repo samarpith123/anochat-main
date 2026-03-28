@@ -2,14 +2,12 @@ import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import app from "./app.js";
 import { logger } from "./lib/logger.js";
-import { db } from "@workspace/db";
-import { messagesTable } from "@workspace/db/schema";
+import { supabase, type SupabaseMessage } from "./lib/supabase.js";
 import {
   addUser,
   removeUserBySocketId,
   updateSocketId,
   getAllUsers,
-  getUserBySocketId,
 } from "./lib/onlineUsers.js";
 
 const rawPort = process.env["PORT"];
@@ -56,27 +54,36 @@ io.on("connection", (socket) => {
     content: string;
   }) => {
     try {
-      const [inserted] = await db
-        .insert(messagesTable)
-        .values({
-          sessionId: data.sessionId,
-          fromUserId: data.fromUserId,
-          toUserId: data.toUserId,
-          fromUsername: data.fromUsername,
+      const { data: inserted, error } = await supabase
+        .from("messages")
+        .insert({
+          session_id: data.sessionId,
+          from_user_id: data.fromUserId,
+          to_user_id: data.toUserId,
+          from_username: data.fromUsername,
           content: data.content,
         })
-        .returning();
+        .select()
+        .single();
+
+      if (error) {
+        logger.error({ error }, "Error saving message to Supabase");
+        return;
+      }
+
+      const msg = inserted as SupabaseMessage;
 
       const message = {
-        id: inserted.id,
-        sessionId: inserted.sessionId,
-        fromUserId: inserted.fromUserId,
-        toUserId: inserted.toUserId,
-        fromUsername: inserted.fromUsername,
-        content: inserted.content,
-        createdAt: inserted.createdAt,
+        id: msg.id,
+        sessionId: msg.session_id,
+        fromUserId: msg.from_user_id,
+        toUserId: msg.to_user_id,
+        fromUsername: msg.from_username,
+        content: msg.content,
+        createdAt: msg.created_at,
       };
 
+      // Emit via Socket.IO for any non-Supabase-Realtime fallback
       io.emit("message:new", { sessionId: data.sessionId, message });
     } catch (err) {
       logger.error({ err }, "Error saving message");
