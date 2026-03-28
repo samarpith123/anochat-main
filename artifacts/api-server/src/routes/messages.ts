@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { supabase, type SupabaseMessage } from "../lib/supabase.js";
+import { getMessages, type SupabaseMessage } from "../lib/supabase.js";
 import { GetMessagesParams, GetMessagesResponse } from "@workspace/api-zod";
 
 const router: IRouter = Router();
@@ -25,22 +25,15 @@ router.get("/:sessionId", async (req, res) => {
 
   const { sessionId } = parsed.data;
 
-  const { data, error } = await supabase
-    .from("messages")
-    .select("*")
-    .eq("session_id", sessionId)
-    .order("created_at", { ascending: true });
-
-  if (error) {
-    res.status(500).json({ error: error.message });
-    return;
+  try {
+    const rows = await getMessages(sessionId);
+    const response = GetMessagesResponse.parse({
+      messages: rows.map(toMessage),
+    });
+    res.json(response);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
-
-  const response = GetMessagesResponse.parse({
-    messages: (data as SupabaseMessage[]).map(toMessage),
-  });
-
-  res.json(response);
 });
 
 export default router;

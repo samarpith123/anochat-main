@@ -2,7 +2,7 @@ import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import app from "./app.js";
 import { logger } from "./lib/logger.js";
-import { supabase, type SupabaseMessage } from "./lib/supabase.js";
+import { insertMessage } from "./lib/supabase.js";
 import {
   addUser,
   removeUserBySocketId,
@@ -54,24 +54,13 @@ io.on("connection", (socket) => {
     content: string;
   }) => {
     try {
-      const { data: inserted, error } = await supabase
-        .from("messages")
-        .insert({
-          session_id: data.sessionId,
-          from_user_id: data.fromUserId,
-          to_user_id: data.toUserId,
-          from_username: data.fromUsername,
-          content: data.content,
-        })
-        .select()
-        .single();
-
-      if (error) {
-        logger.error({ error }, "Error saving message to Supabase");
-        return;
-      }
-
-      const msg = inserted as SupabaseMessage;
+      const msg = await insertMessage({
+        session_id: data.sessionId,
+        from_user_id: data.fromUserId,
+        to_user_id: data.toUserId,
+        from_username: data.fromUsername,
+        content: data.content,
+      });
 
       const message = {
         id: msg.id,
@@ -83,10 +72,11 @@ io.on("connection", (socket) => {
         createdAt: msg.created_at,
       };
 
-      // Emit via Socket.IO for any non-Supabase-Realtime fallback
+      // Supabase Realtime delivers to subscribers automatically.
+      // Also emit via Socket.IO as a fallback for presence/compat.
       io.emit("message:new", { sessionId: data.sessionId, message });
     } catch (err) {
-      logger.error({ err }, "Error saving message");
+      logger.error({ err }, "Error saving message to Supabase");
     }
   });
 
