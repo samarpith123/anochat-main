@@ -1,9 +1,12 @@
-const supabaseUrl = process.env["SUPABASE_URL"];
+const rawSupabaseUrl = process.env["SUPABASE_URL"];
 const serviceRoleKey = process.env["SUPABASE_SERVICE_ROLE_KEY"];
 
-if (!supabaseUrl || !serviceRoleKey) {
+if (!rawSupabaseUrl || !serviceRoleKey) {
   throw new Error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set.");
 }
+
+// Normalize: supabase.com → supabase.co (common input typo)
+const supabaseUrl = rawSupabaseUrl.replace(/supabase\.com$/, "supabase.co");
 
 export type SupabaseMessage = {
   id: number;
@@ -23,10 +26,6 @@ const headers = {
   "Prefer": "return=representation",
 };
 
-// Startup connectivity check
-fetch(`${baseUrl}/messages?limit=0`, { headers })
-  .then(r => console.log("[supabase] connectivity ok, status:", r.status))
-  .catch(e => console.error("[supabase] connectivity FAILED:", e.message, e.cause));
 
 export async function getMessages(sessionId: string): Promise<SupabaseMessage[]> {
   const url = `${baseUrl}/messages?session_id=eq.${encodeURIComponent(sessionId)}&order=created_at.asc`;

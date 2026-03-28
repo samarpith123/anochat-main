@@ -11,10 +11,23 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
 - **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
+- **Message storage**: Supabase (PostgreSQL via REST API, service role key on server)
+- **Real-time**: Supabase Realtime (`postgres_changes` on `messages` INSERT, subscribed from frontend using anon key)
+- **Legacy DB**: Replit PostgreSQL + Drizzle ORM (still used for non-message data; `@workspace/db`)
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
+- **Real-time presence**: Socket.IO (user join/disconnect events; also emits `message:new` as fallback)
+- **Build**: esbuild (ESM bundle)
+
+## Supabase Configuration
+
+- `SUPABASE_URL` — project URL (e.g. `https://<ref>.supabase.co`) — **Note**: the TLD is `.co` not `.com`
+- `SUPABASE_SERVICE_ROLE_KEY` — secret key used server-side for writes (`artifacts/api-server`)
+- `SUPABASE_ANON_KEY` — public key used client-side for Realtime subscriptions (`artifacts/chat-app`)
+
+The API server calls the Supabase REST API directly via `fetch` (no Supabase JS client on the server — esbuild incompatibility). The frontend uses `@supabase/supabase-js` for Realtime.
+
+**Realtime setup required in Supabase dashboard**: Go to Database → Replication and enable the `messages` table for the `supabase_realtime` publication.
 
 ## Structure
 
