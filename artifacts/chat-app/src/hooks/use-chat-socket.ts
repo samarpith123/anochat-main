@@ -1,27 +1,26 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useQueryClient } from '@tanstack/react-query';
 import { getGetMessagesQueryKey } from '@workspace/api-client-react';
 import { useAuth } from './use-auth';
 import { supabase, type SupabaseMessage } from '@/lib/supabase';
-import type { RealtimeChannel } from '@supabase/supabase-js';
 
-// Singleton socket instance to persist across re-renders
+// Singletons — created once, never torn down mid-session
 let socket: Socket | null = null;
+let realtimeSubscribed = false;
 
 export function useChatSocket() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const channelRef = useRef<RealtimeChannel | null>(null);
 
+  // Socket.IO — user presence only
   useEffect(() => {
     if (!user) return;
 
-    // Set up Socket.IO for user presence and sending messages
     if (!socket) {
       socket = io('/', {
         path: '/socket.io',
-        transports: ['websocket', 'polling']
+        transports: ['websocket', 'polling'],
       });
     }
 
@@ -29,7 +28,7 @@ export function useChatSocket() {
       socket?.emit('user:join', {
         userId: user.userId,
         username: user.username,
-        gender: user.gender
+        gender: user.gender,
       });
     };
 
@@ -44,25 +43,17 @@ export function useChatSocket() {
     };
   }, [user]);
 
-  // Subscribe to Supabase Realtime for incoming messages
+  // Supabase Realtime — set up once as a singleton channel
   useEffect(() => {
-    if (!user) return;
+    if (!user || realtimeSubscribed) return;
 
-    // Clean up any existing channel
-    if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
-      channelRef.current = null;
-    }
+    realtimeSubscribed = true;
 
-    const channel = supabase
+    supabase
       .channel('messages-realtime')
       .on(
         'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-        },
+        { event: 'INSERT', schema: 'public', table: 'messages' },
         (payload) => {
           const msg = payload.new as SupabaseMessage;
 
@@ -79,32 +70,15 @@ export function useChatSocket() {
           const queryKey = getGetMessagesQueryKey(msg.session_id);
 
           queryClient.setQueryData(queryKey, (oldData: any) => {
-            if (!oldData || !oldData.messages) {
-              return { messages: [message] };
-            }
-
-            // Prevent duplicates
-            if (oldData.messages.some((m: any) => m.id === message.id)) {
-              return oldData;
-            }
-
-            return {
-              ...oldData,
-              messages: [...oldData.messages, message]
-            };
+            if (!oldData?.messages) return { messages: [message] };
+            if (oldData.messages.some((m: any) => m.id === message.id)) return oldData;
+            return { ...oldData, messages: [...oldData.messages, message] };
           });
         }
       )
       .subscribe();
 
-    channelRef.current = channel;
-
-    return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-        channelRef.current = null;
-      }
-    };
+    // No cleanup — singleton lives for the entire session
   }, [user, queryClient]);
 
   const emitMessage = useCallback((payload: any) => {
