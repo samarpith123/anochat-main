@@ -8,6 +8,7 @@ import LandingPage from "@/pages/landing";
 import UsersPage from "@/pages/users";
 import ChatPage from "@/pages/chat";
 import ReviewQueuePage from "@/pages/review-queue";
+import AdminControlPage from "@/pages/admin-control";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/users" component={UsersPage} />
       <Route path="/chat/:userId" component={ChatPage} />
       <Route path="/review" component={ReviewQueuePage} />
+      <Route path="/admin-control" component={AdminControlPage} />
       <Route component={NotFound} />
     </Switch>
   );

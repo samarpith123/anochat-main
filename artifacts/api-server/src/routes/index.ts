@@ -4,6 +4,7 @@ import usersRouter from "./users.js";
 import messagesRouter from "./messages.js";
 import reportsRouter from "./reports.js";
 import reviewQueueRouter from "./review-queue.js";
+import adminRouter from "./admin.js";
 
 const router: IRouter = Router();
 
@@ -12,5 +13,6 @@ router.use("/users", usersRouter);
 router.use("/messages", messagesRouter);
 router.use("/messages", reportsRouter);
 router.use("/review-queue", reviewQueueRouter);
+router.use("/admin", adminRouter);
 
 export default router;

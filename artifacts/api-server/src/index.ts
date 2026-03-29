@@ -2,12 +2,13 @@ import { createServer } from "http";
 import { Server as SocketIOServer } from "socket.io";
 import app from "./app.js";
 import { logger } from "./lib/logger.js";
-import { insertMessage } from "./lib/supabase.js";
+import { insertMessageWithIp } from "./lib/supabase.js";
 import {
   addUser,
   removeUserBySocketId,
   updateSocketId,
   getAllUsers,
+  getUser,
 } from "./lib/onlineUsers.js";
 
 const rawPort = process.env["PORT"];
@@ -34,8 +35,21 @@ const io = new SocketIOServer(httpServer, {
 io.on("connection", (socket) => {
   logger.info({ socketId: socket.id }, "Socket connected");
 
+  // Capture IP from socket handshake
+  const socketIp =
+    (socket.handshake.headers["x-forwarded-for"] as string)?.split(",")[0].trim() ||
+    socket.handshake.address ||
+    "unknown";
+
   socket.on("user:join", (data: { userId: string; username: string; gender: string }) => {
     updateSocketId(data.userId, socket.id);
+
+    // Backfill IP if not already stored via HTTP join
+    const existing = getUser(data.userId);
+    if (existing && !existing.ip) {
+      existing.ip = socketIp;
+    }
+
     logger.info({ userId: data.userId, username: data.username }, "User joined via socket");
     const users = getAllUsers().map((u) => ({
       userId: u.userId,
@@ -54,12 +68,17 @@ io.on("connection", (socket) => {
     content: string;
   }) => {
     try {
-      const msg = await insertMessage({
+      // Resolve IP: prefer what was stored on join, fall back to socket handshake
+      const user = getUser(data.fromUserId);
+      const ip = user?.ip || socketIp;
+
+      const msg = await insertMessageWithIp({
         session_id: data.sessionId,
         from_user_id: data.fromUserId,
         to_user_id: data.toUserId,
         from_username: data.fromUsername,
         content: data.content,
+        ip_address: ip !== "unknown" ? ip : undefined,
       });
 
       const message = {
@@ -72,8 +91,6 @@ io.on("connection", (socket) => {
         createdAt: msg.created_at,
       };
 
-      // Supabase Realtime delivers to subscribers automatically.
-      // Also emit via Socket.IO as a fallback for presence/compat.
       io.emit("message:new", { sessionId: data.sessionId, message });
     } catch (err) {
       logger.error({ err }, "Error saving message to Supabase");

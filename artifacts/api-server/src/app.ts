@@ -6,6 +6,9 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
+// Trust first proxy hop so req.ip returns real client IP (not proxy IP)
+app.set("trust proxy", 1);
+
 app.use(
   pinoHttp({
     logger,

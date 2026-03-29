@@ -18,6 +18,16 @@ export type SupabaseMessage = {
   created_at: string;
   report_count: number;
   is_hidden: boolean;
+  ip_address?: string;
+};
+
+export type SupabaseBan = {
+  id: number;
+  banned_value: string;
+  ban_type: "user" | "ip";
+  banned_until: string;
+  reason: string;
+  created_at: string;
 };
 
 const baseUrl = `${supabaseUrl}/rest/v1`;
@@ -119,6 +129,18 @@ export async function getReviewQueue(): Promise<SupabaseMessage[]> {
   return res.json() as Promise<SupabaseMessage[]>;
 }
 
+export async function hideMessage(messageId: number): Promise<void> {
+  const res = await fetch(`${baseUrl}/messages?id=eq.${messageId}`, {
+    method: "PATCH",
+    headers: { ...headers, "Prefer": "return=minimal" },
+    body: JSON.stringify({ is_hidden: true }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to hide message: ${res.status} ${text}`);
+  }
+}
+
 export async function restoreMessage(messageId: number): Promise<void> {
   const res = await fetch(`${baseUrl}/messages?id=eq.${messageId}`, {
     method: "PATCH",
@@ -140,4 +162,86 @@ export async function deleteMessage(messageId: number): Promise<void> {
     const text = await res.text();
     throw new Error(`Failed to delete message: ${res.status} ${text}`);
   }
+}
+
+export async function getReportedMessages(): Promise<SupabaseMessage[]> {
+  const url = `${baseUrl}/messages?report_count=gt.0&order=report_count.desc,created_at.desc`;
+  const res = await fetch(url, { headers });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Supabase GET failed: ${res.status} ${text}`);
+  }
+  return res.json() as Promise<SupabaseMessage[]>;
+}
+
+export async function createBan(
+  bannedValue: string,
+  banType: "user" | "ip",
+  hoursUntilExpiry = 24,
+  reason = "Global ban by admin"
+): Promise<SupabaseBan> {
+  const bannedUntil = new Date(Date.now() + hoursUntilExpiry * 60 * 60 * 1000).toISOString();
+  const res = await fetch(`${baseUrl}/bans`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ banned_value: bannedValue, ban_type: banType, banned_until: bannedUntil, reason }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to create ban: ${res.status} ${text}`);
+  }
+  const rows = await res.json() as SupabaseBan[];
+  return rows[0];
+}
+
+export async function getActiveBan(bannedValue: string): Promise<SupabaseBan | null> {
+  const now = new Date().toISOString();
+  const url = `${baseUrl}/bans?banned_value=eq.${encodeURIComponent(bannedValue)}&banned_until=gt.${encodeURIComponent(now)}&limit=1`;
+  const res = await fetch(url, { headers });
+  if (!res.ok) return null;
+  const rows = await res.json() as SupabaseBan[];
+  return rows.length > 0 ? rows[0] : null;
+}
+
+export async function getActiveBans(): Promise<SupabaseBan[]> {
+  const now = new Date().toISOString();
+  const url = `${baseUrl}/bans?banned_until=gt.${encodeURIComponent(now)}&order=created_at.desc`;
+  const res = await fetch(url, { headers });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to fetch bans: ${res.status} ${text}`);
+  }
+  return res.json() as Promise<SupabaseBan[]>;
+}
+
+export async function removeBan(banId: number): Promise<void> {
+  const res = await fetch(`${baseUrl}/bans?id=eq.${banId}`, {
+    method: "DELETE",
+    headers,
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to remove ban: ${res.status} ${text}`);
+  }
+}
+
+export async function insertMessageWithIp(data: {
+  session_id: string;
+  from_user_id: string;
+  to_user_id: string;
+  from_username: string;
+  content: string;
+  ip_address?: string;
+}): Promise<SupabaseMessage> {
+  const res = await fetch(`${baseUrl}/messages`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Supabase INSERT failed: ${res.status} ${text}`);
+  }
+  const rows = await res.json() as SupabaseMessage[];
+  return rows[0];
 }

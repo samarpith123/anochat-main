@@ -3,6 +3,7 @@ export interface OnlineUser {
   username: string;
   gender: "Male" | "Female";
   country?: string;
+  ip?: string;
   joinedAt: Date;
   socketId?: string;
 }
