@@ -145,6 +145,9 @@ components:
         gender:
           type: string
           enum: [Male, Female]
+        country:
+          type: string
+          maxLength: 60
       required:
         - username
         - gender
@@ -157,6 +160,8 @@ components:
         username:
           type: string
         gender:
+          type: string
+        country:
           type: string
       required:
         - userId
@@ -171,6 +176,8 @@ components:
         username:
           type: string
         gender:
+          type: string
+        country:
           type: string
         joinedAt:
           type: string

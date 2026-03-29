@@ -20,15 +20,19 @@ export const HealthCheckResponse = zod.object({
  */
 export const joinChatBodyUsernameMax = 20;
 
+export const joinChatBodyCountryMax = 60;
+
 export const JoinChatBody = zod.object({
   username: zod.string().min(1).max(joinChatBodyUsernameMax),
   gender: zod.enum(["Male", "Female"]),
+  country: zod.string().max(joinChatBodyCountryMax).optional(),
 });
 
 export const JoinChatResponse = zod.object({
   userId: zod.string(),
   username: zod.string(),
   gender: zod.string(),
+  country: zod.string().optional(),
 });
 
 /**
@@ -47,6 +51,7 @@ export const GetOnlineUsersResponse = zod.object({
       userId: zod.string(),
       username: zod.string(),
       gender: zod.string(),
+      country: zod.string().optional(),
       joinedAt: zod.coerce.date(),
     }),
   ),

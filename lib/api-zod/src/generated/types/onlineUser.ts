@@ -10,5 +10,6 @@ export interface OnlineUser {
   userId: string;
   username: string;
   gender: string;
+  country?: string;
   joinedAt: Date;
 }

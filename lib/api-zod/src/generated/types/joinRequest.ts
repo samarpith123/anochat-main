@@ -14,4 +14,6 @@ export interface JoinRequest {
    */
   username: string;
   gender: JoinRequestGender;
+  /** @maxLength 60 */
+  country?: string;
 }

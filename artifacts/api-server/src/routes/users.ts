@@ -12,7 +12,7 @@ router.post("/join", (req, res) => {
     return;
   }
 
-  const { username, gender } = parsed.data;
+  const { username, gender, country } = parsed.data;
 
   if (isUsernameTaken(username)) {
     res.status(409).json({ error: "Username is already taken" });
@@ -20,9 +20,9 @@ router.post("/join", (req, res) => {
   }
 
   const userId = randomUUID();
-  addUser({ userId, username, gender, joinedAt: new Date() });
+  addUser({ userId, username, gender, country: country ?? undefined, joinedAt: new Date() });
 
-  const response = JoinChatResponse.parse({ userId, username, gender });
+  const response = JoinChatResponse.parse({ userId, username, gender, country: country ?? undefined });
   res.json(response);
 });
 
@@ -41,6 +41,7 @@ router.get("/online", (req, res) => {
       userId: u.userId,
       username: u.username,
       gender: u.gender,
+      country: u.country,
       joinedAt: u.joinedAt,
     })),
     total: users.length,

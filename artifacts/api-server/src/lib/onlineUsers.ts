@@ -2,6 +2,7 @@ export interface OnlineUser {
   userId: string;
   username: string;
   gender: "Male" | "Female";
+  country?: string;
   joinedAt: Date;
   socketId?: string;
 }

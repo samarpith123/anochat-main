@@ -5,6 +5,7 @@ export interface UserSession {
   userId: string;
   username: string;
   gender: 'Male' | 'Female';
+  country?: string;
 }
 
 export function useAuth() {
@@ -16,9 +17,10 @@ export function useAuth() {
     const userId = sessionStorage.getItem('userId');
     const username = sessionStorage.getItem('username');
     const gender = sessionStorage.getItem('gender');
+    const country = sessionStorage.getItem('country') ?? undefined;
 
     if (userId && username && gender) {
-      setUser({ userId, username, gender: gender as 'Male' | 'Female' });
+      setUser({ userId, username, gender: gender as 'Male' | 'Female', country });
     }
     setIsLoaded(true);
   }, []);
@@ -27,6 +29,9 @@ export function useAuth() {
     sessionStorage.setItem('userId', session.userId);
     sessionStorage.setItem('username', session.username);
     sessionStorage.setItem('gender', session.gender);
+    if (session.country) {
+      sessionStorage.setItem('country', session.country);
+    }
     setUser(session);
   }, []);
 

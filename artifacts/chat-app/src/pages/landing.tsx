@@ -1,10 +1,110 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useJoinChat } from "@workspace/api-client-react";
 import { useAuth } from "@/hooks/use-auth";
-import { MessageSquare, ArrowRight, UserCircle, AlertCircle } from "lucide-react";
+import { COUNTRIES, type Country } from "@/lib/countries";
+import { MessageSquare, ArrowRight, UserCircle, AlertCircle, ChevronDown, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+function CountryDropdown({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: Country;
+  onChange: (c: Country) => void;
+  disabled?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const filtered = COUNTRIES.filter((c) =>
+    c.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+        setSearch("");
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => searchRef.current?.focus(), 50);
+    }
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => { setOpen((o) => !o); setSearch(""); }}
+        className="w-full flex items-center gap-3 px-4 py-3.5 bg-secondary/50 border border-white/10 rounded-xl text-foreground hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary transition-all disabled:opacity-50"
+      >
+        <span className="text-xl leading-none">{value.flag}</span>
+        <span className="flex-1 text-left font-medium">{value.name}</span>
+        <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform duration-200", open && "rotate-180")} />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.98 }}
+            transition={{ duration: 0.15 }}
+            className="absolute z-50 w-full mt-2 bg-card border border-white/10 rounded-xl shadow-2xl shadow-black/40 overflow-hidden"
+          >
+            {/* Search */}
+            <div className="p-2 border-b border-white/5">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  ref={searchRef}
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search country..."
+                  className="w-full pl-9 pr-3 py-2 bg-secondary/50 border border-white/10 rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+            </div>
+            {/* List */}
+            <div className="max-h-52 overflow-y-auto">
+              {filtered.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">No results</p>
+              ) : (
+                filtered.map((c) => (
+                  <button
+                    key={c.code}
+                    type="button"
+                    onClick={() => { onChange(c); setOpen(false); setSearch(""); }}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-secondary/70 transition-colors text-left",
+                      c.code === value.code && "bg-primary/10 text-primary"
+                    )}
+                  >
+                    <span className="text-lg leading-none">{c.flag}</span>
+                    <span className="font-medium">{c.name}</span>
+                  </button>
+                ))
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const [, setLocation] = useLocation();
@@ -12,6 +112,7 @@ export default function LandingPage() {
   
   const [username, setUsername] = useState("");
   const [gender, setGender] = useState<'Male' | 'Female'>('Male');
+  const [country, setCountry] = useState<Country>(COUNTRIES[0]); // India first
   const [errorMsg, setErrorMsg] = useState("");
 
   const joinMutation = useJoinChat();
@@ -33,13 +134,14 @@ export default function LandingPage() {
 
     try {
       const response = await joinMutation.mutateAsync({
-        data: { username: username.trim(), gender }
+        data: { username: username.trim(), gender, country: country.code }
       });
       
       login({
         userId: response.userId,
         username: response.username,
-        gender: response.gender as 'Male' | 'Female'
+        gender: response.gender as 'Male' | 'Female',
+        country: response.country ?? country.code,
       });
       
       setLocation('/users');
@@ -84,7 +186,8 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Username */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground ml-1">Choose a Username</label>
               <div className="relative">
@@ -101,6 +204,7 @@ export default function LandingPage() {
               </div>
             </div>
 
+            {/* Gender */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground ml-1">I identify as</label>
               <div className="grid grid-cols-2 gap-4">
@@ -131,6 +235,16 @@ export default function LandingPage() {
                   Female
                 </button>
               </div>
+            </div>
+
+            {/* Country */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground ml-1">Your Country</label>
+              <CountryDropdown
+                value={country}
+                onChange={setCountry}
+                disabled={joinMutation.isPending}
+              />
             </div>
 
             {errorMsg && (

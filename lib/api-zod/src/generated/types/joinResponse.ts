@@ -10,4 +10,5 @@ export interface JoinResponse {
   userId: string;
   username: string;
   gender: string;
+  country?: string;
 }

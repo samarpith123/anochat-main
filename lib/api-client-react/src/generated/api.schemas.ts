@@ -24,18 +24,22 @@ export interface JoinRequest {
    */
   username: string;
   gender: JoinRequestGender;
+  /** @maxLength 60 */
+  country?: string;
 }
 
 export interface JoinResponse {
   userId: string;
   username: string;
   gender: string;
+  country?: string;
 }
 
 export interface OnlineUser {
   userId: string;
   username: string;
   gender: string;
+  country?: string;
   joinedAt: string;
 }
 

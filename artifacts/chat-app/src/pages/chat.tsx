@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation, useParams, Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useChatSocket } from "@/hooks/use-chat-socket";
@@ -6,8 +6,9 @@ import { useGetMessages, useGetOnlineUsers } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { generateSessionId, cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { Send, ArrowLeft, Loader2, MessageSquare, Flag, Check } from "lucide-react";
+import { Send, ArrowLeft, Loader2, MessageSquare, Flag, Check, Ban } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { formatCountry } from "@/lib/countries";
 
 const API_BASE = "/api";
 
@@ -26,6 +27,21 @@ function saveReportedIds(ids: Set<number>) {
   } catch {}
 }
 
+function loadBlockedIds(): Set<string> {
+  try {
+    const stored = localStorage.getItem("blockedUserIds");
+    return new Set(stored ? JSON.parse(stored) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveBlockedIds(ids: Set<string>) {
+  try {
+    localStorage.setItem("blockedUserIds", JSON.stringify([...ids]));
+  } catch {}
+}
+
 export default function ChatPage() {
   const { user, isLoaded } = useAuth();
   const [, setLocation] = useLocation();
@@ -40,6 +56,23 @@ export default function ChatPage() {
   const [confirmingId, setConfirmingId] = useState<number | null>(null);
   const [reportingId, setReportingId] = useState<number | null>(null);
 
+  // Block state
+  const [blockedIds, setBlockedIds] = useState<Set<string>>(loadBlockedIds);
+
+  const isBlocked = theirId ? blockedIds.has(theirId) : false;
+
+  const handleToggleBlock = useCallback(() => {
+    if (!theirId) return;
+    const updated = new Set(blockedIds);
+    if (updated.has(theirId)) {
+      updated.delete(theirId);
+    } else {
+      updated.add(theirId);
+    }
+    setBlockedIds(updated);
+    saveBlockedIds(updated);
+  }, [blockedIds, theirId]);
+
   // Auto redirect if not logged in or missing param
   useEffect(() => {
     if (isLoaded && (!user || !theirId)) {
@@ -49,23 +82,20 @@ export default function ChatPage() {
 
   const { emitMessage } = useChatSocket();
 
-  // Try to find the user in the online list to show their name/gender
-  // We fetch without filter to get everyone
   const { data: usersData } = useGetOnlineUsers({}, { 
     query: { refetchInterval: 10000 } 
   });
   
   const theirInfo = usersData?.users.find(u => u.userId === theirId);
   const theirUsername = theirInfo?.username || "User";
+  const theirCountry = theirInfo?.country;
 
   const sessionId = user && theirId ? generateSessionId(user.userId, theirId) : "";
 
-  // Fetch initial messages REST
   const { data: messagesData, isLoading: isLoadingMessages } = useGetMessages(sessionId, {
     query: { enabled: !!sessionId }
   });
 
-  // Auto-scroll to bottom
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -76,10 +106,10 @@ export default function ChatPage() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!messageText.trim() || !user || !theirId || !sessionId) return;
+    if (!messageText.trim() || !user || !theirId || !sessionId || isBlocked) return;
 
     const content = messageText.trim();
-    setMessageText(""); // Optimistic clear
+    setMessageText("");
 
     try {
       const payload = {
@@ -89,10 +119,7 @@ export default function ChatPage() {
         fromUsername: user.username,
         content
       };
-
-      // Send only via socket — server saves to DB and broadcasts message:new to all clients
       emitMessage(payload);
-
     } catch (err) {
       console.error("Failed to send message:", err);
     }
@@ -135,32 +162,69 @@ export default function ChatPage() {
               <ArrowLeft className="w-5 h-5" />
             </Link>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-inner",
-                theirInfo?.gender === 'Male' ? "bg-blue-500/20 text-blue-400" : 
-                theirInfo?.gender === 'Female' ? "bg-pink-500/20 text-pink-400" : "bg-secondary text-foreground"
+                "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-inner shrink-0",
+                isBlocked
+                  ? "bg-muted/20 text-muted-foreground"
+                  : theirInfo?.gender === 'Male' ? "bg-blue-500/20 text-blue-400" 
+                  : theirInfo?.gender === 'Female' ? "bg-pink-500/20 text-pink-400" 
+                  : "bg-secondary text-foreground"
               )}>
-                {theirUsername.substring(0, 2).toUpperCase()}
+                {isBlocked ? <Ban className="w-4 h-4" /> : theirUsername.substring(0, 2).toUpperCase()}
               </div>
-              <div>
-                <h2 className="font-bold text-foreground leading-tight">{theirUsername}</h2>
+              <div className="min-w-0">
+                <h2 className={cn("font-bold leading-tight truncate", isBlocked ? "text-muted-foreground" : "text-foreground")}>
+                  {theirUsername}
+                </h2>
                 <div className="flex items-center gap-1.5">
-                  <span className={cn(
-                    "w-2 h-2 rounded-full",
-                    theirInfo ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-muted-foreground"
-                  )} />
-                  <span className="text-xs text-muted-foreground font-medium">
-                    {theirInfo ? 'Online' : 'Offline'}
-                  </span>
+                  {isBlocked ? (
+                    <span className="text-xs text-red-400/80 font-medium">Blocked</span>
+                  ) : (
+                    <>
+                      <span className={cn(
+                        "w-2 h-2 rounded-full shrink-0",
+                        theirInfo ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-muted-foreground"
+                      )} />
+                      <span className="text-xs text-muted-foreground font-medium truncate">
+                        {theirInfo ? 'Online' : 'Offline'}
+                        {theirCountry && ` · ${formatCountry(theirCountry)}`}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
+
+            {/* Block / Unblock button */}
+            <button
+              onClick={handleToggleBlock}
+              title={isBlocked ? "Unblock user" : "Block user"}
+              className={cn(
+                "ml-2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200",
+                isBlocked
+                  ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                  : "text-muted-foreground hover:text-red-400 hover:bg-red-400/10"
+              )}
+            >
+              <Ban className="w-3.5 h-3.5" />
+              {isBlocked ? "Unblock" : "Block"}
+            </button>
           </div>
 
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
-            {isLoadingMessages ? (
+            {isBlocked ? (
+              <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+                <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mb-4">
+                  <Ban className="w-8 h-8 text-red-400/60" />
+                </div>
+                <p className="font-medium text-foreground">You've blocked {theirUsername}</p>
+                <p className="text-sm mt-1 text-center max-w-xs">
+                  You won't receive or send messages. Click <span className="font-semibold text-foreground/70">Unblock</span> above to resume.
+                </p>
+              </div>
+            ) : isLoadingMessages ? (
               <div className="h-full flex items-center justify-center">
                 <Loader2 className="w-8 h-8 text-primary animate-spin" />
               </div>
@@ -198,7 +262,7 @@ export default function ChatPage() {
                       )}
                       
                       <div className="flex items-end gap-2">
-                        {/* Report button — only for others' messages, left side */}
+                        {/* Report button — only for others' messages */}
                         {!isMine && (
                           <div className="flex flex-col items-center shrink-0 mb-0.5">
                             {isConfirming ? (
@@ -261,7 +325,10 @@ export default function ChatPage() {
           </div>
 
           {/* Input Area */}
-          <div className="p-4 bg-card/90 backdrop-blur-lg border-t border-white/5 shrink-0">
+          <div className={cn(
+            "p-4 bg-card/90 backdrop-blur-lg border-t border-white/5 shrink-0",
+            isBlocked && "opacity-50 pointer-events-none"
+          )}>
             <form 
               onSubmit={handleSend}
               className="flex items-end gap-3 relative"
@@ -275,14 +342,15 @@ export default function ChatPage() {
                     handleSend(e);
                   }
                 }}
-                placeholder="Type a message..."
-                className="w-full bg-secondary/50 border border-white/10 rounded-2xl px-5 py-3.5 pr-14 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none min-h-[52px] max-h-[120px]"
+                placeholder={isBlocked ? "You have blocked this user" : "Type a message..."}
+                disabled={isBlocked}
+                className="w-full bg-secondary/50 border border-white/10 rounded-2xl px-5 py-3.5 pr-14 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none min-h-[52px] max-h-[120px] disabled:cursor-not-allowed"
                 rows={1}
                 maxLength={1000}
               />
               <button
                 type="submit"
-                disabled={!messageText.trim()}
+                disabled={!messageText.trim() || isBlocked}
                 className="absolute right-2 bottom-2 p-2.5 bg-primary text-white rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:hover:bg-primary transition-colors shadow-md shadow-primary/20"
               >
                 <Send className="w-4 h-4 ml-0.5" />
