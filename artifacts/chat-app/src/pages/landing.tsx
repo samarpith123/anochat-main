@@ -385,14 +385,12 @@ export default function LandingPage() {
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <User className="w-3 h-3 shrink-0" />
-                    {/* UPDATE THIS: Replace with your designated Grievance Officer's name */}
-                    <span>Compliance Officer, Anochat</span>
+                    <span>Ashish Samuel, Anochat</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Mail className="w-3 h-3 shrink-0" />
-                    {/* UPDATE THIS: Replace with your designated Grievance Officer's email */}
-                    <a href="mailto:grievance@anochat.in" className="hover:text-foreground transition-colors underline underline-offset-2">
-                      grievance@anochat.in
+                    <a href="mailto:loneworld123@gmail.com" className="hover:text-foreground transition-colors underline underline-offset-2">
+                      loneworld123@gmail.com
                     </a>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
