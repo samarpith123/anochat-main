@@ -29,6 +29,47 @@ The API server calls the Supabase REST API directly via `fetch` (no Supabase JS 
 
 **Realtime setup required in Supabase dashboard**: Go to Database → Replication and enable the `messages` table for the `supabase_realtime` publication.
 
+### Supabase Schema
+
+```sql
+-- Core messages table (Realtime enabled)
+-- Required columns: id, session_id, from_user_id, to_user_id, from_username,
+--   content, created_at, report_count (default 0), is_hidden (default false),
+--   ip_address (text, nullable)
+
+-- Reports join table
+-- message_reports(message_id, reporter_user_id) with unique constraint
+
+-- Bans table (IT Rules 2026 compliance)
+CREATE TABLE IF NOT EXISTS public.bans (
+  id bigserial PRIMARY KEY,
+  banned_value text NOT NULL,
+  ban_type text NOT NULL DEFAULT 'user' CHECK (ban_type IN ('user', 'ip')),
+  banned_until timestamptz NOT NULL,
+  reason text NOT NULL DEFAULT 'Banned by admin',
+  created_at timestamptz DEFAULT now() NOT NULL
+);
+CREATE INDEX IF NOT EXISTS bans_value_until_idx ON public.bans(banned_value, banned_until);
+
+-- Add IP column to messages if not present
+ALTER TABLE public.messages ADD COLUMN IF NOT EXISTS ip_address text;
+```
+
+## Admin Dashboard
+
+- URL: `/admin-control` (not linked from the main UI)
+- Password: `ADMIN_PASSWORD` Replit secret (8-hour sessions stored in memory)
+- Features: view all reported messages, hide/restore/delete messages, global 24-hour ban by userId + IP
+- Admin API routes: `POST /api/admin/login`, `GET /api/admin/reported`, `POST /api/admin/ban`, `GET /api/admin/bans`, `DELETE /api/admin/bans/:id`
+- `ADMIN_PASSWORD` must be set as a Replit Secret
+
+## Moderation Features
+
+- Report button (flag icon, hover-reveal on messages) — 3 reports auto-hides via Supabase UPDATE Realtime
+- `/review` page — moderator queue for hidden messages (restore/delete)
+- Admin ban check runs on every `/users/join` for both userId and IP
+- IP captured from `x-forwarded-for` header on join and stored with messages
+
 ## Structure
 
 ```text
