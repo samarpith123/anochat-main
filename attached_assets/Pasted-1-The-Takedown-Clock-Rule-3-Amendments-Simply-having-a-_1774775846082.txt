@@ -1,0 +1,36 @@
+1. The "Takedown Clock" (Rule 3 Amendments)
+Simply having a report button isn't enough; you must act within specific windows once a report is "received."
+
+2-Hour Rule: For grievances involving non-consensual nudity, impersonation, or morphed content (including AI deepfakes), you must remove or disable access within 2 hours of the report.
+
+3-Hour Rule: If you receive a formal order from a court or a government agency to remove unlawful content, you must comply within 3 hours.
+
+36-Hour Rule: For general reports of "unlawful content" (hate speech, incitement to violence), you must act within 36 hours.
+
+7-Day Resolution: All other user grievances must be fully resolved (meaning a decision is made and the user is notified) within 7 days (down from the previous 15-day limit).
+
+2. Appoint a Grievance Officer
+Under the IT Rules 2021 (Updated 2026), every intermediary must have a designated Grievance Officer.
+
+Action: You must publish the name and contact details (usually a dedicated email address) of this officer prominently on your website (e.g., in the Footer or Contact Us page).
+
+Acknowledgment: Your system should automatically send an acknowledgment receipt to the user within 24 hours of them clicking that "Report" button.
+
+3. Implement the "6-Hour Session" Rule
+If your anonymous chat allows web-based access (which anochat.in likely does), new Telecom Cyber Security Rules effective March 2026 require:
+
+Auto-Logout: All web/desktop sessions must automatically log out every 6 hours.
+
+Re-authentication: Users must re-authenticate (e.g., via a new random ID generation or QR code) to prevent "session hijacking" by remote bad actors.
+
+4. Mandatory Quarterly Advisories
+The 2026 rules changed the requirement for informing users about your terms.
+
+The Change: Instead of once a year, you must now send a periodic advisory at least once every three months to all users.
+
+Content: This advisory must clearly state that if they violate the rules (e.g., posting illegal content), you have the right to terminate their access and that they may face legal penalties under the Bharatiya Nyaya Sanhita (BNS).
+
+5. Data Retention & The 3-Year Rule
+Investigation Logs: If you remove content or suspend a user due to a report, you must preserve the relevant logs (IP addresses, timestamps, and the content itself) for 180 days for potential law enforcement requests.
+
+Dormant Accounts: Under the DPDP Act Rules (Nov 2025), you are required to delete a user's data if they have been inactive for 3 years, after giving them a 48-hour notice.

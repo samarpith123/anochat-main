@@ -14,7 +14,11 @@ router.post("/:id/report", async (req, res) => {
 
   try {
     const result = await reportMessage(id, reporterUserId);
-    res.json(result);
+
+    // Generate a reference ID for the grievance acknowledgment (IT Rules 2026)
+    const referenceId = `REF-${id}-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+
+    res.json({ ...result, referenceId });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

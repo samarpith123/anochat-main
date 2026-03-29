@@ -225,6 +225,62 @@ export async function removeBan(banId: number): Promise<void> {
   }
 }
 
+export type TakedownLog = {
+  id: number;
+  message_id: number;
+  from_user_id?: string;
+  from_username?: string;
+  content: string;
+  ip_address?: string;
+  action: "deleted" | "hidden" | "banned";
+  reason: string;
+  report_count: number;
+  actioned_at: string;
+  retain_until: string;
+};
+
+export async function createTakedownLog(data: {
+  message_id: number;
+  from_user_id?: string;
+  from_username?: string;
+  content: string;
+  ip_address?: string;
+  action: "deleted" | "hidden" | "banned";
+  reason?: string;
+  report_count?: number;
+}): Promise<void> {
+  const retain_until = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString();
+  const res = await fetch(`${baseUrl}/takedown_logs`, {
+    method: "POST",
+    headers: { ...headers, "Prefer": "return=minimal" },
+    body: JSON.stringify({
+      message_id: data.message_id,
+      from_user_id: data.from_user_id,
+      from_username: data.from_username,
+      content: data.content,
+      ip_address: data.ip_address,
+      action: data.action,
+      reason: data.reason ?? "Reported content",
+      report_count: data.report_count ?? 0,
+      retain_until,
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    // Log but don't throw — takedown logging failure should not block the action
+    console.error(`[TakedownLog] Failed to write log: ${res.status} ${text}`);
+  }
+}
+
+// Fetch a single message by ID (used before deletion for logging)
+export async function getMessageById(messageId: number): Promise<SupabaseMessage | null> {
+  const url = `${baseUrl}/messages?id=eq.${messageId}&limit=1`;
+  const res = await fetch(url, { headers });
+  if (!res.ok) return null;
+  const rows = await res.json() as SupabaseMessage[];
+  return rows[0] ?? null;
+}
+
 export async function insertMessageWithIp(data: {
   session_id: string;
   from_user_id: string;

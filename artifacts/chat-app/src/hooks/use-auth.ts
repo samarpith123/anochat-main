@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'wouter';
+import { recordSessionStart } from './use-session-expiry';
 
 export interface UserSession {
   userId: string;
@@ -32,6 +33,7 @@ export function useAuth() {
     if (session.country) {
       sessionStorage.setItem('country', session.country);
     }
+    recordSessionStart(); // Start 6-hour compliance clock (IT Rules 2026)
     setUser(session);
   }, []);
 

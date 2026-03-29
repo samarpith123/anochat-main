@@ -8,6 +8,8 @@ import {
   deleteMessage,
   restoreMessage,
   hideMessage,
+  getMessageById,
+  createTakedownLog,
   type SupabaseMessage,
 } from "../lib/supabase.js";
 import { getUser } from "../lib/onlineUsers.js";
@@ -130,7 +132,20 @@ router.post("/messages/:id/hide", adminMiddleware, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
   try {
+    const msg = await getMessageById(id);
     await hideMessage(id);
+    if (msg) {
+      await createTakedownLog({
+        message_id: id,
+        from_user_id: msg.from_user_id,
+        from_username: msg.from_username,
+        content: msg.content,
+        ip_address: msg.ip_address,
+        action: "hidden",
+        reason: "Hidden by admin",
+        report_count: msg.report_count,
+      });
+    }
     res.json({ ok: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -154,7 +169,20 @@ router.delete("/messages/:id", adminMiddleware, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) { res.status(400).json({ error: "Invalid ID" }); return; }
   try {
+    const msg = await getMessageById(id);
     await deleteMessage(id);
+    if (msg) {
+      await createTakedownLog({
+        message_id: id,
+        from_user_id: msg.from_user_id,
+        from_username: msg.from_username,
+        content: msg.content,
+        ip_address: msg.ip_address,
+        action: "deleted",
+        reason: "Deleted by admin",
+        report_count: msg.report_count,
+      });
+    }
     res.json({ ok: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });

@@ -2,11 +2,12 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation, useParams, Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useChatSocket } from "@/hooks/use-chat-socket";
+import { useSessionExpiry } from "@/hooks/use-session-expiry";
 import { useGetMessages, useGetOnlineUsers } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { generateSessionId, cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { Send, ArrowLeft, Loader2, MessageSquare, Flag, Check, Ban } from "lucide-react";
+import { Send, ArrowLeft, Loader2, MessageSquare, Flag, Check, Ban, Clock, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatCountry } from "@/lib/countries";
 
@@ -43,7 +44,7 @@ function saveBlockedIds(ids: Set<string>) {
 }
 
 export default function ChatPage() {
-  const { user, isLoaded } = useAuth();
+  const { user, isLoaded, logout } = useAuth();
   const [, setLocation] = useLocation();
   const params = useParams();
   const theirId = params.userId;
@@ -51,10 +52,14 @@ export default function ChatPage() {
   const [messageText, setMessageText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // 6-hour session expiry (IT Rules 2026 — Telecom Cyber Security)
+  const { minutesLeft, isExpiring } = useSessionExpiry(logout);
+
   // Report state
   const [reportedIds, setReportedIds] = useState<Set<number>>(loadReportedIds);
   const [confirmingId, setConfirmingId] = useState<number | null>(null);
   const [reportingId, setReportingId] = useState<number | null>(null);
+  const [lastRefId, setLastRefId] = useState<string | null>(null);
 
   // Block state
   const [blockedIds, setBlockedIds] = useState<Set<string>>(loadBlockedIds);
@@ -135,10 +140,12 @@ export default function ChatPage() {
         body: JSON.stringify({ reporterUserId: user.userId }),
       });
       if (!res.ok) throw new Error("Report failed");
+      const data = await res.json();
       const updated = new Set(reportedIds);
       updated.add(msgId);
       setReportedIds(updated);
       saveReportedIds(updated);
+      if (data.referenceId) setLastRefId(data.referenceId);
     } catch (err) {
       console.error(err);
     } finally {
@@ -211,6 +218,28 @@ export default function ChatPage() {
               {isBlocked ? "Unblock" : "Block"}
             </button>
           </div>
+
+          {/* Session Expiry Warning Banner (IT Rules 2026 — 6-Hour Rule) */}
+          <AnimatePresence>
+            {isExpiring && minutesLeft !== null && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="flex items-center gap-2 bg-yellow-500/10 border-b border-yellow-500/20 px-4 py-2 text-yellow-400">
+                  <Clock className="w-3.5 h-3.5 shrink-0" />
+                  <span className="text-xs font-medium flex-1">
+                    Session expires in <strong>{minutesLeft} min</strong> (IT Rules 2026 — 6-hour limit)
+                  </span>
+                  <button onClick={logout} className="text-xs font-semibold underline hover:text-yellow-300 transition-colors">
+                    Re-join now
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
@@ -323,6 +352,32 @@ export default function ChatPage() {
             )}
             <div ref={messagesEndRef} />
           </div>
+
+          {/* Report Acknowledgment (IT Rules 2026 — 24hr reference receipt) */}
+          <AnimatePresence>
+            {lastRefId && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="flex items-start gap-3 bg-green-500/10 border-t border-green-500/20 px-4 py-3">
+                  <Check className="w-4 h-4 text-green-400 shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-green-400">Report received — save your reference ID</p>
+                    <p className="text-[11px] text-green-400/70 mt-0.5">
+                      Our Grievance Officer will review within 36 hours (2 hours for urgent content).
+                    </p>
+                    <p className="font-mono text-xs text-green-300 mt-1 font-bold tracking-wide">{lastRefId}</p>
+                  </div>
+                  <button onClick={() => setLastRefId(null)} className="text-green-400/50 hover:text-green-400 transition-colors">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Input Area */}
           <div className={cn(

@@ -3,7 +3,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import {
   Shield, Lock, Eye, EyeOff, RefreshCw, Loader2, AlertTriangle,
   Trash2, Ban, RotateCcw, LogOut, Flag, CheckCircle, EyeOff as HideIcon,
-  Clock, User, Wifi
+  Clock, User, Wifi, Clock as ClockIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -188,6 +188,18 @@ function MessageCard({
 
   const isActioning = (label: string) => actioning === label;
 
+  // SLA urgency clock (IT Rules 2026 takedown windows)
+  const hoursElapsed = (Date.now() - new Date(msg.createdAt).getTime()) / (1000 * 60 * 60);
+  const slaBreach = hoursElapsed >= 36;
+  const slaWarning = hoursElapsed >= 2 && hoursElapsed < 36;
+  const slaOk = hoursElapsed < 2;
+
+  const slaLabel = slaOk
+    ? `${Math.round(hoursElapsed * 60)}m old — within 2h SLA`
+    : slaBreach
+    ? `${Math.floor(hoursElapsed)}h old — 36h SLA BREACHED`
+    : `${Math.floor(hoursElapsed)}h old — within 36h SLA`;
+
   return (
     <div className={cn(
       "glass-panel rounded-2xl p-5 border transition-all",
@@ -210,6 +222,16 @@ function MessageCard({
               Hidden
             </span>
           )}
+          {/* SLA Urgency Clock */}
+          <span className={cn(
+            "flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full",
+            slaOk ? "bg-green-500/10 text-green-400"
+              : slaWarning ? "bg-yellow-500/10 text-yellow-400"
+              : "bg-red-600/20 text-red-300 animate-pulse"
+          )}>
+            <Clock className="w-3 h-3" />
+            {slaLabel}
+          </span>
         </div>
         <span className="text-xs text-muted-foreground shrink-0">
           {format(new Date(msg.createdAt), "MMM d, h:mm a")}
