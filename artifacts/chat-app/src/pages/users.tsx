@@ -159,6 +159,12 @@ export default function UsersPage() {
                       href={`/chat/${u.userId}`}
                       onClick={(e) => {
                         e.preventDefault();
+                        sessionStorage.setItem("chatPartner", JSON.stringify({
+                          userId: u.userId,
+                          username: u.username,
+                          gender: u.gender,
+                          country: u.country,
+                        }));
                         setLocation(`/chat/${u.userId}`);
                       }}
                       className="group/card block glass-panel p-5 rounded-2xl hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 relative overflow-hidden"

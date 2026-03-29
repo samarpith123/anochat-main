@@ -87,13 +87,24 @@ export default function ChatPage() {
 
   const { emitMessage } = useChatSocket();
 
+  // Read cached partner info stored when user clicked their card in the users list
+  const cachedPartner = (() => {
+    try {
+      const raw = sessionStorage.getItem("chatPartner");
+      if (!raw) return null;
+      const p = JSON.parse(raw);
+      return p?.userId === theirId ? p : null;
+    } catch { return null; }
+  })();
+
   const { data: usersData } = useGetOnlineUsers({}, { 
     query: { refetchInterval: 10000 } 
   });
   
   const theirInfo = usersData?.users.find(u => u.userId === theirId);
-  const theirUsername = theirInfo?.username || "User";
-  const theirCountry = theirInfo?.country;
+  const theirUsername = theirInfo?.username || cachedPartner?.username || "User";
+  const theirCountry = theirInfo?.country ?? cachedPartner?.country;
+  const theirGender = theirInfo?.gender ?? cachedPartner?.gender;
 
   const sessionId = user && theirId ? generateSessionId(user.userId, theirId) : "";
 
@@ -174,8 +185,8 @@ export default function ChatPage() {
                 "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-inner shrink-0",
                 isBlocked
                   ? "bg-muted/20 text-muted-foreground"
-                  : theirInfo?.gender === 'Male' ? "bg-blue-500/20 text-blue-400" 
-                  : theirInfo?.gender === 'Female' ? "bg-pink-500/20 text-pink-400" 
+                  : theirGender === 'Male' ? "bg-blue-500/20 text-blue-400" 
+                  : theirGender === 'Female' ? "bg-pink-500/20 text-pink-400" 
                   : "bg-secondary text-foreground"
               )}>
                 {isBlocked ? <Ban className="w-4 h-4" /> : theirUsername.substring(0, 2).toUpperCase()}

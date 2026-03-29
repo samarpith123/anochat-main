@@ -70,6 +70,17 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
+    proxy: {
+      "/api": {
+        target: `http://localhost:${process.env.API_SERVER_PORT ?? 8080}`,
+        changeOrigin: true,
+      },
+      "/socket.io": {
+        target: `http://localhost:${process.env.API_SERVER_PORT ?? 8080}`,
+        changeOrigin: true,
+        ws: true,
+      },
+    },
   },
   preview: {
     port,
