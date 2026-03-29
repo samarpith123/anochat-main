@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import LandingPage from "@/pages/landing";
 import UsersPage from "@/pages/users";
 import ChatPage from "@/pages/chat";
+import ReviewQueuePage from "@/pages/review-queue";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/" component={LandingPage} />
       <Route path="/users" component={UsersPage} />
       <Route path="/chat/:userId" component={ChatPage} />
+      <Route path="/review" component={ReviewQueuePage} />
       <Route component={NotFound} />
     </Switch>
   );

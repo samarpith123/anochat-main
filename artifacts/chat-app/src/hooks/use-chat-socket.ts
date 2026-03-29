@@ -57,6 +57,9 @@ export function useChatSocket() {
         (payload) => {
           const msg = payload.new as SupabaseMessage;
 
+          // Ignore messages that are already hidden (edge case)
+          if (msg.is_hidden) return;
+
           const message = {
             id: msg.id,
             sessionId: msg.session_id,
@@ -74,6 +77,25 @@ export function useChatSocket() {
             if (oldData.messages.some((m: any) => m.id === message.id)) return oldData;
             return { ...oldData, messages: [...oldData.messages, message] };
           });
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'messages' },
+        (payload) => {
+          const msg = payload.new as SupabaseMessage;
+
+          // When a message gets hidden (3 reports), remove it from every open chat in real-time
+          if (msg.is_hidden) {
+            const queryKey = getGetMessagesQueryKey(msg.session_id);
+            queryClient.setQueryData(queryKey, (oldData: any) => {
+              if (!oldData?.messages) return oldData;
+              return {
+                ...oldData,
+                messages: oldData.messages.filter((m: any) => m.id !== msg.id),
+              };
+            });
+          }
         }
       )
       .subscribe();

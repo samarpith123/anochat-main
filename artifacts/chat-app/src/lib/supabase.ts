@@ -20,4 +20,6 @@ export type SupabaseMessage = {
   from_username: string;
   content: string;
   created_at: string;
+  report_count: number;
+  is_hidden: boolean;
 };

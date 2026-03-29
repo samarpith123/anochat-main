@@ -6,8 +6,25 @@ import { useGetMessages, useGetOnlineUsers } from "@workspace/api-client-react";
 import { Layout } from "@/components/Layout";
 import { generateSessionId, cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { Send, ArrowLeft, Loader2, MessageSquare } from "lucide-react";
+import { Send, ArrowLeft, Loader2, MessageSquare, Flag, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+const API_BASE = "/api";
+
+function loadReportedIds(): Set<number> {
+  try {
+    const stored = localStorage.getItem("reportedMessageIds");
+    return new Set(stored ? JSON.parse(stored) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveReportedIds(ids: Set<number>) {
+  try {
+    localStorage.setItem("reportedMessageIds", JSON.stringify([...ids]));
+  } catch {}
+}
 
 export default function ChatPage() {
   const { user, isLoaded } = useAuth();
@@ -17,6 +34,11 @@ export default function ChatPage() {
 
   const [messageText, setMessageText] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Report state
+  const [reportedIds, setReportedIds] = useState<Set<number>>(loadReportedIds);
+  const [confirmingId, setConfirmingId] = useState<number | null>(null);
+  const [reportingId, setReportingId] = useState<number | null>(null);
 
   // Auto redirect if not logged in or missing param
   useEffect(() => {
@@ -73,6 +95,28 @@ export default function ChatPage() {
 
     } catch (err) {
       console.error("Failed to send message:", err);
+    }
+  };
+
+  const handleReport = async (msgId: number) => {
+    if (!user || reportedIds.has(msgId) || reportingId === msgId) return;
+    setReportingId(msgId);
+    try {
+      const res = await fetch(`${API_BASE}/messages/${msgId}/report`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reporterUserId: user.userId }),
+      });
+      if (!res.ok) throw new Error("Report failed");
+      const updated = new Set(reportedIds);
+      updated.add(msgId);
+      setReportedIds(updated);
+      saveReportedIds(updated);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setReportingId(null);
+      setConfirmingId(null);
     }
   };
 
@@ -133,6 +177,9 @@ export default function ChatPage() {
                 {messages.map((msg, idx) => {
                   const isMine = msg.fromUserId === user.userId;
                   const showHeader = idx === 0 || messages[idx - 1].fromUserId !== msg.fromUserId;
+                  const isReported = reportedIds.has(msg.id);
+                  const isConfirming = confirmingId === msg.id;
+                  const isSubmitting = reportingId === msg.id;
                   
                   return (
                     <motion.div 
@@ -140,7 +187,7 @@ export default function ChatPage() {
                       initial={{ opacity: 0, y: 10, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       className={cn(
-                        "flex flex-col max-w-[75%]",
+                        "flex flex-col max-w-[75%] group",
                         isMine ? "ml-auto items-end" : "mr-auto items-start"
                       )}
                     >
@@ -150,13 +197,56 @@ export default function ChatPage() {
                         </span>
                       )}
                       
-                      <div className={cn(
-                        "px-4 py-2.5 rounded-2xl shadow-sm text-[15px] leading-relaxed",
-                        isMine 
-                          ? "bg-primary text-primary-foreground rounded-tr-sm shadow-primary/20" 
-                          : "bg-secondary text-secondary-foreground rounded-tl-sm border border-white/5"
-                      )}>
-                        {msg.content}
+                      <div className="flex items-end gap-2">
+                        {/* Report button — only for others' messages, left side */}
+                        {!isMine && (
+                          <div className="flex flex-col items-center shrink-0 mb-0.5">
+                            {isConfirming ? (
+                              <div className="flex items-center gap-1 bg-secondary border border-white/10 rounded-xl px-2 py-1 shadow-lg">
+                                <span className="text-[11px] text-muted-foreground whitespace-nowrap">Report?</span>
+                                <button
+                                  onClick={() => handleReport(msg.id)}
+                                  disabled={isSubmitting}
+                                  className="text-[11px] font-semibold text-red-400 hover:text-red-300 px-1 transition-colors disabled:opacity-50"
+                                >
+                                  {isSubmitting ? <Loader2 className="w-3 h-3 animate-spin" /> : "Yes"}
+                                </button>
+                                <button
+                                  onClick={() => setConfirmingId(null)}
+                                  className="text-[11px] text-muted-foreground hover:text-foreground px-1 transition-colors"
+                                >
+                                  No
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => !isReported && setConfirmingId(msg.id)}
+                                disabled={isReported}
+                                title={isReported ? "You've reported this" : "Report message"}
+                                className={cn(
+                                  "p-1.5 rounded-lg transition-all",
+                                  isReported
+                                    ? "text-green-500 opacity-80"
+                                    : "text-muted-foreground/0 group-hover:text-muted-foreground/60 hover:!text-red-400 hover:bg-red-400/10"
+                                )}
+                              >
+                                {isReported
+                                  ? <Check className="w-3.5 h-3.5" />
+                                  : <Flag className="w-3.5 h-3.5" />
+                                }
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        <div className={cn(
+                          "px-4 py-2.5 rounded-2xl shadow-sm text-[15px] leading-relaxed",
+                          isMine 
+                            ? "bg-primary text-primary-foreground rounded-tr-sm shadow-primary/20" 
+                            : "bg-secondary text-secondary-foreground rounded-tl-sm border border-white/5"
+                        )}>
+                          {msg.content}
+                        </div>
                       </div>
                       
                       <span className="text-[10px] text-muted-foreground mt-1 px-1 opacity-60">
