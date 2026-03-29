@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useLocation, useParams, Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useChatSocket } from "@/hooks/use-chat-socket";
@@ -87,30 +87,38 @@ export default function ChatPage() {
 
   const { emitMessage } = useChatSocket();
 
-  // Read cached partner info stored when user clicked their card in the users list
-  const cachedPartner = (() => {
+  // Read cached partner info once on mount (stored when user clicked their card)
+  const [cachedPartner] = useState<{ userId: string; username: string; gender?: string; country?: string } | null>(() => {
     try {
       const raw = sessionStorage.getItem("chatPartner");
       if (!raw) return null;
       const p = JSON.parse(raw);
       return p?.userId === theirId ? p : null;
     } catch { return null; }
-  })();
+  });
 
   const { data: usersData } = useGetOnlineUsers({}, { 
     query: { refetchInterval: 10000 } 
   });
-  
-  const theirInfo = usersData?.users.find(u => u.userId === theirId);
-  const theirUsername = theirInfo?.username || cachedPartner?.username || "User";
-  const theirCountry = theirInfo?.country ?? cachedPartner?.country;
-  const theirGender = theirInfo?.gender ?? cachedPartner?.gender;
 
   const sessionId = user && theirId ? generateSessionId(user.userId, theirId) : "";
 
   const { data: messagesData, isLoading: isLoadingMessages } = useGetMessages(sessionId, {
     query: { enabled: !!sessionId }
   });
+
+  const theirInfo = usersData?.users.find(u => u.userId === theirId);
+
+  // Derive username: live online list → sessionStorage cache → message history → fallback
+  const theirUsername = useMemo(() => {
+    if (theirInfo?.username) return theirInfo.username;
+    if (cachedPartner?.username) return cachedPartner.username;
+    const msgFromThem = messagesData?.messages?.find((m: any) => m.fromUserId === theirId);
+    return (msgFromThem as any)?.fromUsername || "User";
+  }, [theirInfo, cachedPartner, messagesData, theirId]);
+
+  const theirCountry = theirInfo?.country ?? cachedPartner?.country;
+  const theirGender = theirInfo?.gender ?? cachedPartner?.gender;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
