@@ -35,7 +35,6 @@ const io = new SocketIOServer(httpServer, {
 io.on("connection", (socket) => {
   logger.info({ socketId: socket.id }, "Socket connected");
 
-  // Capture IP from socket handshake
   const socketIp =
     (socket.handshake.headers["x-forwarded-for"] as string)?.split(",")[0].trim() ||
     socket.handshake.address ||
@@ -44,7 +43,6 @@ io.on("connection", (socket) => {
   socket.on("user:join", (data: { userId: string; username: string; gender: string }) => {
     updateSocketId(data.userId, socket.id);
 
-    // Backfill IP if not already stored via HTTP join
     const existing = getUser(data.userId);
     if (existing && !existing.ip) {
       existing.ip = socketIp;
@@ -60,41 +58,52 @@ io.on("connection", (socket) => {
     io.emit("users:update", { users, total: users.length });
   });
 
-  socket.on("message:send", async (data: {
+  socket.on("message:send", (data: {
     sessionId: string;
     fromUserId: string;
     toUserId: string;
     fromUsername: string;
     content: string;
+    tempId: string; // client-generated temp ID for optimistic UI
   }) => {
-    try {
-      // Resolve IP: prefer what was stored on join, fall back to socket handshake
-      const user = getUser(data.fromUserId);
-      const ip = user?.ip || socketIp;
+    const user = getUser(data.fromUserId);
+    const ip = user?.ip || socketIp;
 
-      const msg = await insertMessageWithIp({
-        session_id: data.sessionId,
-        from_user_id: data.fromUserId,
-        to_user_id: data.toUserId,
-        from_username: data.fromUsername,
-        content: data.content,
-        ip_address: ip !== "unknown" ? ip : undefined,
-      });
+    // Build the optimistic message using a temp ID — emit immediately
+    const optimisticMessage = {
+      tempId: data.tempId,
+      sessionId: data.sessionId,
+      fromUserId: data.fromUserId,
+      toUserId: data.toUserId,
+      fromUsername: data.fromUsername,
+      content: data.content,
+      createdAt: new Date().toISOString(),
+    };
 
-      const message = {
+    // Emit to all connected clients RIGHT NOW — no DB round-trip wait
+    io.emit("message:new", { sessionId: data.sessionId, message: optimisticMessage });
+
+    // Write to Supabase in the background — non-blocking
+    insertMessageWithIp({
+      session_id: data.sessionId,
+      from_user_id: data.fromUserId,
+      to_user_id: data.toUserId,
+      from_username: data.fromUsername,
+      content: data.content,
+      ip_address: ip !== "unknown" ? ip : undefined,
+    }).then((msg) => {
+      // Confirm the real DB id back to ALL clients so they can replace the temp message
+      io.emit("message:confirmed", {
+        sessionId: data.sessionId,
+        tempId: data.tempId,
         id: msg.id,
-        sessionId: msg.session_id,
-        fromUserId: msg.from_user_id,
-        toUserId: msg.to_user_id,
-        fromUsername: msg.from_username,
-        content: msg.content,
         createdAt: msg.created_at,
-      };
-
-      io.emit("message:new", { sessionId: data.sessionId, message });
-    } catch (err) {
+      });
+    }).catch((err) => {
       logger.error({ err }, "Error saving message to Supabase");
-    }
+      // Tell sender the message failed so they can show an error
+      socket.emit("message:failed", { tempId: data.tempId });
+    });
   });
 
   socket.on("disconnect", () => {

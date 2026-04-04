@@ -3,7 +3,8 @@ import { useLocation, useParams, Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useChatSocket } from "@/hooks/use-chat-socket";
 import { useSessionExpiry } from "@/hooks/use-session-expiry";
-import { useGetMessages, useGetOnlineUsers } from "@workspace/api-client-react";
+import { useGetMessages, useGetOnlineUsers, getGetMessagesQueryKey } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Layout } from "@/components/Layout";
 import { generateSessionId, cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -45,6 +46,7 @@ function saveBlockedIds(ids: Set<string>) {
 
 export default function ChatPage() {
   const { user, isLoaded, logout } = useAuth();
+  const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const params = useParams();
   const theirId = params.userId;
@@ -135,18 +137,31 @@ export default function ChatPage() {
     const content = messageText.trim();
     setMessageText("");
 
-    try {
-      const payload = {
+    const payload = {
+      sessionId,
+      fromUserId: user.userId,
+      toUserId: theirId,
+      fromUsername: user.username,
+      content,
+    };
+
+    // Optimistically insert into local cache immediately (zero-latency for sender)
+    const tempId = emitMessage(payload);
+    const queryKey = getGetMessagesQueryKey(sessionId);
+    queryClient.setQueryData(queryKey, (oldData: any) => {
+      const optimistic = {
+        id: tempId,
+        tempId,
         sessionId,
         fromUserId: user.userId,
         toUserId: theirId,
         fromUsername: user.username,
-        content
+        content,
+        createdAt: new Date(),
       };
-      emitMessage(payload);
-    } catch (err) {
-      console.error("Failed to send message:", err);
-    }
+      if (!oldData?.messages) return { messages: [optimistic] };
+      return { ...oldData, messages: [...oldData.messages, optimistic] };
+    });
   };
 
   const handleReport = async (msgId: number) => {
