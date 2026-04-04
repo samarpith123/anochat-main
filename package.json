@@ -21,4 +21,8 @@
       "picomatch@4": "4.0.4"
     }
   }
+  "engines": {
+  "node": ">=20",
+  "pnpm": "9"
+}
 }
