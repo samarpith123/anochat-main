@@ -90,7 +90,7 @@ export default function ChatPage() {
   const { emitMessage } = useChatSocket();
 
   // Read cached partner info once on mount (stored when user clicked their card)
-  const [cachedPartner] = useState<{ userId: string; username: string; gender?: string; country?: string } | null>(() => {
+  const [cachedPartner] = useState<{ userId: string; username: string; gender?: string; age?: number; country?: string } | null>(() => {
     try {
       const raw = sessionStorage.getItem("chatPartner");
       if (!raw) return null;
@@ -121,6 +121,7 @@ export default function ChatPage() {
 
   const theirCountry = theirInfo?.country ?? cachedPartner?.country;
   const theirGender = theirInfo?.gender ?? cachedPartner?.gender;
+  const theirAge = theirInfo?.age ?? cachedPartner?.age;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -229,6 +230,8 @@ export default function ChatPage() {
                       )} />
                       <span className="text-xs text-muted-foreground font-medium truncate">
                         {theirInfo ? 'Online' : 'Offline'}
+                        {theirGender && ` · ${theirGender}`}
+                        {theirAge && ` · ${theirAge}`}
                         {theirCountry && ` · ${formatCountry(theirCountry)}`}
                       </span>
                     </>

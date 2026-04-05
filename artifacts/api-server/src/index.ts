@@ -40,7 +40,7 @@ io.on("connection", (socket) => {
     socket.handshake.address ||
     "unknown";
 
-  socket.on("user:join", (data: { userId: string; username: string; gender: string }) => {
+  socket.on("user:join", (data: { userId: string; username: string; gender: string; age: number }) => {
     updateSocketId(data.userId, socket.id);
 
     const existing = getUser(data.userId);
@@ -53,6 +53,7 @@ io.on("connection", (socket) => {
       userId: u.userId,
       username: u.username,
       gender: u.gender,
+      age: u.age,
       joinedAt: u.joinedAt,
     }));
     io.emit("users:update", { users, total: users.length });
@@ -114,6 +115,7 @@ io.on("connection", (socket) => {
         userId: u.userId,
         username: u.username,
         gender: u.gender,
+        age: u.age,
         joinedAt: u.joinedAt,
       }));
       io.emit("users:update", { users, total: users.length });

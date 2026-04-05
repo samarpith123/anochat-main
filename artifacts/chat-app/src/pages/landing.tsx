@@ -194,6 +194,7 @@ export default function LandingPage() {
 
   const [username, setUsername] = useState("");
   const [gender, setGender] = useState<'Male' | 'Female'>('Male');
+  const [age, setAge] = useState<number>(18);
   const [country, setCountry] = useState<Country>(COUNTRIES[0]);
   const [errorMsg, setErrorMsg] = useState("");
   const [showAdvisory, setShowAdvisory] = useState(false);
@@ -228,15 +229,21 @@ export default function LandingPage() {
       return;
     }
 
+    if (age < 18 || age > 99) {
+      setErrorMsg("You must be between 18 and 99 years old.");
+      return;
+    }
+
     try {
       const response = await joinMutation.mutateAsync({
-        data: { username: username.trim(), gender, country: country.code }
+        data: { username: username.trim(), gender, age, country: country.code }
       });
 
       login({
         userId: response.userId,
         username: response.username,
         gender: response.gender as 'Male' | 'Female',
+        age: response.age,
         country: response.country ?? country.code,
       });
 
@@ -337,6 +344,48 @@ export default function LandingPage() {
                     <div className={cn("w-2 h-2 rounded-full", gender === 'Female' ? "bg-pink-400 shadow-[0_0_8px_rgba(244,114,182,0.8)]" : "bg-transparent")} />
                     Female
                   </button>
+                </div>
+              </div>
+
+
+              {/* Age */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground ml-1">Your Age</label>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setAge(a => Math.max(18, a - 1))}
+                    disabled={age <= 18 || joinMutation.isPending}
+                    className="w-11 h-11 flex items-center justify-center rounded-xl bg-secondary/50 border border-white/10 text-foreground text-xl font-bold hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-all select-none"
+                  >
+                    −
+                  </button>
+                  <div className="flex-1 flex flex-col items-center justify-center bg-secondary/50 border border-white/10 rounded-xl py-2">
+                    <span className="text-3xl font-bold text-foreground tabular-nums leading-none">{age}</span>
+                    <span className="text-xs text-muted-foreground mt-1">years old</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAge(a => Math.min(99, a + 1))}
+                    disabled={age >= 99 || joinMutation.isPending}
+                    className="w-11 h-11 flex items-center justify-center rounded-xl bg-secondary/50 border border-white/10 text-foreground text-xl font-bold hover:bg-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-all select-none"
+                  >
+                    +
+                  </button>
+                </div>
+                <input
+                  type="range"
+                  min={18}
+                  max={99}
+                  step={1}
+                  value={age}
+                  onChange={e => setAge(Number(e.target.value))}
+                  disabled={joinMutation.isPending}
+                  className="w-full accent-primary disabled:opacity-50 cursor-pointer"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground px-1">
+                  <span>18</span>
+                  <span>99</span>
                 </div>
               </div>
 

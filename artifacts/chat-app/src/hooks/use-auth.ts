@@ -6,6 +6,7 @@ export interface UserSession {
   userId: string;
   username: string;
   gender: 'Male' | 'Female';
+  age: number;
   country?: string;
 }
 
@@ -18,10 +19,14 @@ export function useAuth() {
     const userId = sessionStorage.getItem('userId');
     const username = sessionStorage.getItem('username');
     const gender = sessionStorage.getItem('gender');
+    const ageRaw = sessionStorage.getItem('age');
     const country = sessionStorage.getItem('country') ?? undefined;
 
-    if (userId && username && gender) {
-      setUser({ userId, username, gender: gender as 'Male' | 'Female', country });
+    if (userId && username && gender && ageRaw) {
+      const age = parseInt(ageRaw, 10);
+      if (!isNaN(age)) {
+        setUser({ userId, username, gender: gender as 'Male' | 'Female', age, country });
+      }
     }
     setIsLoaded(true);
   }, []);
@@ -30,10 +35,11 @@ export function useAuth() {
     sessionStorage.setItem('userId', session.userId);
     sessionStorage.setItem('username', session.username);
     sessionStorage.setItem('gender', session.gender);
+    sessionStorage.setItem('age', String(session.age));
     if (session.country) {
       sessionStorage.setItem('country', session.country);
     }
-    recordSessionStart(); // Start 6-hour compliance clock (IT Rules 2026)
+    recordSessionStart();
     setUser(session);
   }, []);
 

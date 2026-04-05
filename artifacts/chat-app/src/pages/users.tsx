@@ -163,6 +163,7 @@ export default function UsersPage() {
                           userId: u.userId,
                           username: u.username,
                           gender: u.gender,
+                          age: u.age,
                           country: u.country,
                         }));
                         setLocation(`/chat/${u.userId}`);
@@ -188,7 +189,7 @@ export default function UsersPage() {
                               "w-1.5 h-1.5 rounded-full animate-pulse shrink-0",
                               u.gender === 'Male' ? "bg-blue-500" : "bg-pink-500"
                             )} />
-                            {u.gender}
+                            {u.gender} · {u.age}
                           </p>
                           {countryLabel && (
                             <p className="text-xs text-muted-foreground/70 mt-0.5 truncate">

@@ -13,7 +13,7 @@ router.post("/join", async (req, res) => {
     return;
   }
 
-  const { username, gender, country } = parsed.data;
+  const { username, gender, age, country } = parsed.data;
 
   // Extract real client IP (trust proxy is set in app.ts)
   const ip =
@@ -35,9 +35,9 @@ router.post("/join", async (req, res) => {
   }
 
   const userId = randomUUID();
-  addUser({ userId, username, gender, country: country ?? undefined, ip, joinedAt: new Date() });
+  addUser({ userId, username, gender, age, country: country ?? undefined, ip, joinedAt: new Date() });
 
-  const response = JoinChatResponse.parse({ userId, username, gender, country: country ?? undefined });
+  const response = JoinChatResponse.parse({ userId, username, gender, age, country: country ?? undefined });
   res.json(response);
 });
 
@@ -56,6 +56,7 @@ router.get("/online", (req, res) => {
       userId: u.userId,
       username: u.username,
       gender: u.gender,
+      age: u.age,
       country: u.country,
       joinedAt: u.joinedAt,
     })),

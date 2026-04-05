@@ -41,6 +41,7 @@ export function useChatSocket() {
         userId: user.userId,
         username: user.username,
         gender: user.gender,
+        age: user.age,
       });
     };
 

@@ -145,12 +145,17 @@ components:
         gender:
           type: string
           enum: [Male, Female]
+        age:
+          type: integer
+          minimum: 18
+          maximum: 99
         country:
           type: string
           maxLength: 60
       required:
         - username
         - gender
+        - age
 
     JoinResponse:
       type: object
@@ -161,12 +166,15 @@ components:
           type: string
         gender:
           type: string
+        age:
+          type: integer
         country:
           type: string
       required:
         - userId
         - username
         - gender
+        - age
 
     OnlineUser:
       type: object
@@ -177,6 +185,8 @@ components:
           type: string
         gender:
           type: string
+        age:
+          type: integer
         country:
           type: string
         joinedAt:
@@ -184,6 +194,7 @@ components:
           format: date-time
       required:
         - userId
+        - age
         - username
         - gender
         - joinedAt

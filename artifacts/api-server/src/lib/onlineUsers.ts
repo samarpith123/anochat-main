@@ -2,6 +2,7 @@ export interface OnlineUser {
   userId: string;
   username: string;
   gender: "Male" | "Female";
+  age: number;
   country?: string;
   ip?: string;
   joinedAt: Date;
