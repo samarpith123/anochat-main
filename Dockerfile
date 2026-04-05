@@ -12,25 +12,34 @@ COPY artifacts/api-server/package.json ./artifacts/api-server/
 
 RUN pnpm install --no-frozen-lockfile
 
+# Use pnpm deploy to create a clean, self-contained node_modules for api-server
+# This resolves all symlinks properly - perfect for Docker
+COPY lib ./lib
+COPY artifacts/api-server ./artifacts/api-server
+RUN pnpm --filter @workspace/api-server deploy --prod /app/deploy
+
 # Stage 2: build the esbuild bundle
 FROM node:24-alpine AS builder
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
-COPY --from=deps /app/node_modules                      ./node_modules
-COPY --from=deps /app/artifacts/api-server/node_modules ./artifacts/api-server/node_modules
-COPY . .
+COPY --from=deps /app/node_modules ./node_modules
+COPY lib ./lib
+COPY artifacts/api-server ./artifacts/api-server
+COPY pnpm-workspace.yaml package.json ./
 
-RUN pnpm --filter @workspace/api-server run build
+RUN cd artifacts/api-server && node ./build.mjs
 
-# Stage 3: lean production image — zod/drizzle are bundled so only @supabase needed
+# Stage 3: lean production image
 FROM node:24-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=8080
 
+# Copy the built bundle
 COPY --from=builder /app/artifacts/api-server/dist ./dist
-COPY --from=builder /app/node_modules              ./node_modules
+# Copy the self-contained node_modules (all symlinks resolved by pnpm deploy)
+COPY --from=deps /app/deploy/node_modules ./node_modules
 
 EXPOSE 8080
 CMD ["node", "dist/index.mjs"]
