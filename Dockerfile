@@ -3,7 +3,7 @@ FROM node:24-alpine AS deps
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
-COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY pnpm-workspace.yaml package.json ./
 COPY lib/api-zod/package.json          ./lib/api-zod/
 COPY lib/db/package.json               ./lib/db/
 COPY lib/api-client-react/package.json ./lib/api-client-react/
