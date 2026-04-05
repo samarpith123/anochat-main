@@ -23,7 +23,7 @@ COPY . .
 
 RUN pnpm --filter @workspace/api-server run build
 
-# Stage 3: lean production image
+# Stage 3: lean production image — zod/drizzle are bundled so only @supabase needed
 FROM node:24-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
