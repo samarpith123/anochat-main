@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useJoinChat } from "@workspace/api-client-react";
@@ -183,6 +183,29 @@ function RuleItem({ icon, title, children }: { icon: string; title: string; chil
         <p className="text-sm font-semibold text-foreground mb-1">{title}</p>
         <p className="text-xs text-muted-foreground leading-relaxed">{children}</p>
       </div>
+    </div>
+  );
+}
+
+
+// ── FAQ Accordion Item ────────────────────────────────────────────────────────
+function FaqItem({ question, answer }: { question: string; answer: string }) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div className="glass-panel rounded-xl border border-white/5 overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-5 py-4 text-left gap-3 hover:bg-secondary/30 transition-colors"
+      >
+        <span className="text-sm font-semibold text-foreground">{question}</span>
+        <ChevronDown className={cn("w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-200", open && "rotate-180")} />
+      </button>
+      {open && (
+        <div className="px-5 pb-4">
+          <p className="text-sm text-muted-foreground leading-relaxed">{answer}</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -452,6 +475,97 @@ export default function LandingPage() {
           </div>
         </motion.div>
       </div>
+      {/* ── About Section ────────────────────────────────────────────────── */}
+      <div className="relative z-10 w-full max-w-2xl mx-auto px-4 mt-10 mb-6">
+        <p className="text-sm text-muted-foreground/70 text-center leading-relaxed">
+          AnoChat.in is a privacy-first platform designed for spontaneous, meaningful connections. Built for the modern web, we bridge the gap between global anonymity and local relevance, allowing you to strike up candid conversations without the digital footprint. Whether you're looking for a quick debate, a friendly chat, or a global perspective, our streamlined interface ensures your privacy is the priority and the conversation is the focus.
+        </p>
+      </div>
+
+      {/* ── FAQ Section ──────────────────────────────────────────────────── */}
+      <div className="relative z-10 w-full max-w-2xl mx-auto px-4 mb-10">
+        <h2 className="text-lg font-bold text-foreground text-center mb-4">Frequently Asked Questions</h2>
+        <div className="space-y-2">
+          {[
+            {
+              q: "Is AnoChat.in really anonymous?",
+              a: "Yes. We do not require emails, phone numbers, or social logins. Conversations are ephemeral and session-based."
+            },
+            {
+              q: "What is the 3-Hour Takedown Rule?",
+              a: "In compliance with IT Rules 2026, any reported deepfakes or non-consensual imagery are reviewed and removed within 2-3 hours."
+            },
+            {
+              q: "Can I block someone?",
+              a: "Absolutely. Use the 'Block' icon in the chat header to instantly end the session and prevent that user from matching with you again."
+            },
+            {
+              q: "Is this service free?",
+              a: "Yes, the core chat experience is 100% free."
+            },
+          ].map((item, i) => (
+            <FaqItem key={i} question={item.q} answer={item.a} />
+          ))}
+        </div>
+      </div>
+
+      {/* ── Footer ───────────────────────────────────────────────────────── */}
+      <footer className="relative z-10 w-full border-t border-white/5 bg-card/30 backdrop-blur-sm mt-4">
+        <div className="max-w-5xl mx-auto px-6 py-10">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
+            {/* Platform */}
+            <div>
+              <p className="text-xs font-semibold text-foreground uppercase tracking-widest mb-3">Platform</p>
+              <ul className="space-y-2">
+                {["How it works", "Features", "Roadmap", "Status"].map(l => (
+                  <li key={l}><span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors">{l}</span></li>
+                ))}
+              </ul>
+            </div>
+            {/* Support */}
+            <div>
+              <p className="text-xs font-semibold text-foreground uppercase tracking-widest mb-3">Support</p>
+              <ul className="space-y-2">
+                {["Help Centre", "Safety Tips", "Report Abuse", "Contact Us"].map(l => (
+                  <li key={l}><span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors">{l}</span></li>
+                ))}
+              </ul>
+            </div>
+            {/* Legal */}
+            <div>
+              <p className="text-xs font-semibold text-foreground uppercase tracking-widest mb-3">Legal</p>
+              <ul className="space-y-2">
+                {["Privacy Policy", "Terms of Service", "IT Rules 2026", "Cookie Policy"].map(l => (
+                  <li key={l}><span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors">{l}</span></li>
+                ))}
+              </ul>
+            </div>
+            {/* Company */}
+            <div>
+              <p className="text-xs font-semibold text-foreground uppercase tracking-widest mb-3">Company</p>
+              <ul className="space-y-2">
+                {["About Us", "Blog", "Careers", "Press"].map(l => (
+                  <li key={l}><span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors">{l}</span></li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-white/5 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-primary/20 flex items-center justify-center">
+                <MessageSquare className="w-4 h-4 text-primary" />
+              </div>
+              <span className="font-bold text-sm text-foreground">AnoChat.in</span>
+            </div>
+            <p className="text-xs text-muted-foreground text-center">
+              © {new Date().getFullYear()} AnoChat.in · Privacy-first anonymous chat · India
+            </p>
+            <p className="text-xs text-muted-foreground">Made with ♥ in India</p>
+          </div>
+        </div>
+      </footer>
+
     </>
   );
 }
