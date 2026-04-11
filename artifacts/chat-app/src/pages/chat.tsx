@@ -199,61 +199,89 @@ export default function ChatPage() {
         <div className="flex flex-col h-full glass-panel sm:rounded-3xl overflow-hidden border-x-0 sm:border-x">
           
           {/* Chat Header */}
-          <div className="h-16 border-b border-white/5 bg-card/80 flex items-center px-4 shrink-0 z-10 backdrop-blur-md">
-            <Link href="/users" className="p-2 mr-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors">
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            
-            <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="border-b border-white/5 bg-card/80 px-4 py-3 shrink-0 z-10 backdrop-blur-md">
+            <div className="flex items-center gap-3">
+              <Link href="/users" className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full transition-colors shrink-0">
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+
+              {/* Avatar */}
               <div className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-inner shrink-0",
+                "w-12 h-12 rounded-full flex items-center justify-center font-bold text-base shadow-inner shrink-0",
                 isBlocked
                   ? "bg-muted/20 text-muted-foreground"
-                  : theirGender === 'Male' ? "bg-blue-500/20 text-blue-400" 
-                  : theirGender === 'Female' ? "bg-pink-500/20 text-pink-400" 
+                  : theirGender === 'Male' ? "bg-blue-500/20 text-blue-400"
+                  : theirGender === 'Female' ? "bg-pink-500/20 text-pink-400"
                   : "bg-secondary text-foreground"
               )}>
-                {isBlocked ? <Ban className="w-4 h-4" /> : theirUsername.substring(0, 2).toUpperCase()}
+                {isBlocked ? <Ban className="w-5 h-5" /> : theirUsername.substring(0, 2).toUpperCase()}
               </div>
-              <div className="min-w-0">
-                <h2 className={cn("font-bold leading-tight truncate", isBlocked ? "text-muted-foreground" : "text-foreground")}>
+
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                {/* Username — large and prominent */}
+                <h2 className={cn("font-bold text-lg leading-tight truncate", isBlocked ? "text-muted-foreground" : "text-foreground")}>
                   {theirUsername}
                 </h2>
-                <div className="flex items-center gap-1.5">
-                  {isBlocked ? (
-                    <span className="text-xs text-red-400/80 font-medium">Blocked</span>
-                  ) : (
-                    <>
+
+                {/* Details row */}
+                {isBlocked ? (
+                  <span className="text-xs text-red-400/80 font-medium">Blocked</span>
+                ) : (
+                  <div className="flex items-center flex-wrap gap-x-2 gap-y-0.5 mt-0.5">
+                    {/* Online status */}
+                    <span className="flex items-center gap-1">
                       <span className={cn(
                         "w-2 h-2 rounded-full shrink-0",
-                        theirInfo ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-muted-foreground"
+                        theirInfo ? "bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.8)]" : "bg-muted-foreground/50"
                       )} />
-                      <span className="text-xs text-muted-foreground font-medium truncate">
-                        {theirInfo ? 'Online' : 'Offline'}
-                        {theirGender && ` · ${theirGender}`}
-                        {theirAge && ` · ${theirAge}`}
-                        {theirCountry && ` · ${formatCountry(theirCountry)}`}
+                      <span className={cn("text-xs font-semibold", theirInfo ? "text-green-400" : "text-muted-foreground")}>
+                        {theirInfo ? "Online" : "Offline"}
                       </span>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
+                    </span>
 
-            {/* Block / Unblock button */}
-            <button
-              onClick={handleToggleBlock}
-              title={isBlocked ? "Unblock user" : "Block user"}
-              className={cn(
-                "ml-2 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200",
-                isBlocked
-                  ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
-                  : "text-muted-foreground hover:text-red-400 hover:bg-red-400/10"
-              )}
-            >
-              <Ban className="w-3.5 h-3.5" />
-              {isBlocked ? "Unblock" : "Block"}
-            </button>
+                    {/* Gender badge */}
+                    {theirGender && (
+                      <span className={cn(
+                        "text-xs font-medium px-2 py-0.5 rounded-full",
+                        theirGender === 'Male' ? "bg-blue-500/15 text-blue-400" : "bg-pink-500/15 text-pink-400"
+                      )}>
+                        {theirGender}
+                      </span>
+                    )}
+
+                    {/* Age badge */}
+                    {theirAge && (
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
+                        {theirAge} yrs
+                      </span>
+                    )}
+
+                    {/* Country */}
+                    {theirCountry && (
+                      <span className="text-xs text-muted-foreground truncate">
+                        {formatCountry(theirCountry)}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Block / Unblock button */}
+              <button
+                onClick={handleToggleBlock}
+                title={isBlocked ? "Unblock user" : "Block user"}
+                className={cn(
+                  "ml-1 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 shrink-0",
+                  isBlocked
+                    ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                    : "text-muted-foreground hover:text-red-400 hover:bg-red-400/10"
+                )}
+              >
+                <Ban className="w-3.5 h-3.5" />
+                {isBlocked ? "Unblock" : "Block"}
+              </button>
+            </div>
           </div>
 
           {/* Session Expiry Warning Banner (IT Rules 2026 — 6-Hour Rule) */}
