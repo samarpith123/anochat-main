@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service — AnoChat.in</title>
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0f; --card: #0f0f18; --border: rgba(255,255,255,0.07);
+      --primary: #6b5ff8; --accent: #3399ff;
+      --text: #f9f9f9; --muted: #9898a8; --radius: 1rem;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; flex-direction: column; line-height: 1.7; }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { position: sticky; top: 0; z-index: 50; background: rgba(10,10,15,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); height: 64px; display: flex; align-items: center; padding: 0 2rem; justify-content: space-between; }
+    .nav-brand { display: flex; align-items: center; gap: 10px; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.2rem; color: var(--text); text-decoration: none; }
+    .nav-icon { width: 38px; height: 38px; border-radius: 10px; background: rgba(107,95,248,0.2); display: flex; align-items: center; justify-content: center; }
+    .nav-icon svg { width: 20px; height: 20px; color: var(--primary); }
+    .nav-cta { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; padding: 0.5rem 1.25rem; border-radius: 0.75rem; font-weight: 600; font-size: 0.875rem; border: none; cursor: pointer; text-decoration: none; }
+    .page-hero { text-align: center; padding: 4rem 1.5rem 2rem; max-width: 700px; margin: 0 auto; }
+    .page-hero .badge { display: inline-block; background: rgba(107,95,248,0.15); color: #a89df5; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.35rem 1rem; border-radius: 2rem; border: 1px solid rgba(107,95,248,0.25); margin-bottom: 1.25rem; }
+    .page-hero h1 { font-family: 'Outfit', sans-serif; font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; line-height: 1.2; margin-bottom: 1rem; background: linear-gradient(135deg, #fff 40%, #9898a8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .page-hero p { color: var(--muted); font-size: 1rem; max-width: 520px; margin: 0 auto; }
+    .updated { text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 0.5rem; }
+    main { flex: 1; max-width: 800px; width: 100%; margin: 0 auto; padding: 0 1.5rem 4rem; }
+    .section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem 2rem; margin-bottom: 1rem; }
+    .section h2 { font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text); }
+    .section p, .section li { color: var(--muted); font-size: 0.9rem; line-height: 1.7; margin-bottom: 0.5rem; }
+    .section ul { padding-left: 1.25rem; }
+    .section li { margin-bottom: 0.4rem; }
+    .law-card { background: rgba(107,95,248,0.08); border: 1px solid rgba(107,95,248,0.25); border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin-top: 0.75rem; }
+    .law-card h3 { font-size: 0.95rem; font-weight: 600; color: #a89df5; margin-bottom: 0.5rem; }
+    .law-card p { color: var(--muted); font-size: 0.875rem; margin: 0; }
+    .warning { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin-top: 0.75rem; }
+    .warning p { color: #fca5a5; font-size: 0.875rem; margin: 0; }
+    footer { border-top: 1px solid var(--border); background: rgba(15,15,24,0.6); padding: 2.5rem 2rem; }
+    .footer-inner { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; }
+    .footer-links a { color: var(--muted); font-size: 0.85rem; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { color: var(--muted); font-size: 0.8rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="nav-brand">
+      <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+      AnoChat
+    </a>
+    <a href="/" class="nav-cta">Start Chatting</a>
+  </nav>
+
+  <div class="page-hero">
+    <div class="badge">Legal</div>
+    <h1>Terms of Service</h1>
+    <p>By using AnoChat.in, you agree to these terms. Please read them carefully before starting a chat session.</p>
+    <p class="updated">Last updated: April 2026 · Effective immediately</p>
+  </div>
+
+  <main>
+    <div class="section">
+      <h2>1. Acceptance of Terms</h2>
+      <p>By accessing or using AnoChat.in, you confirm that you are at least 18 years of age, have read and understood these Terms of Service, and agree to be bound by them. If you do not agree, you must immediately stop using the platform.</p>
+    </div>
+
+    <div class="section">
+      <h2>2. Compliance with Bharatiya Nyaya Sanhita (BNS) 2023</h2>
+      <p>AnoChat.in operates in full compliance with the Bharatiya Nyaya Sanhita (BNS) 2023, which replaces the Indian Penal Code. Users are strictly prohibited from using this platform to:</p>
+      <ul>
+        <li>Transmit obscene, sexually explicit, or defamatory content (Section 294, 296 BNS)</li>
+        <li>Incite hatred, violence, or communal discord (Section 196, 197 BNS)</li>
+        <li>Threaten, intimidate, or stalk any individual (Section 351, 352 BNS)</li>
+        <li>Commit fraud, impersonation, or cheating (Section 318, 319 BNS)</li>
+        <li>Distribute non-consensual intimate imagery or AI-generated deepfakes</li>
+      </ul>
+      <div class="law-card">
+        <h3>Legal Notice — BNS 2023</h3>
+        <p>Any violation of the above provisions is a cognisable offence under Indian law. AnoChat.in will cooperate fully with law enforcement agencies, including the Indian Cyber Crime Coordination Centre (I4C), upon receipt of a valid legal order. User IP addresses and session data are retained for 180 days for this purpose.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>3. Compliance with IT Rules 2026</h2>
+      <p>AnoChat.in is an intermediary as defined under the Information Technology Act, 2000 and operates in accordance with the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules 2026. Our specific obligations and commitments include:</p>
+      <ul>
+        <li><strong style="color:#f9f9f9">Takedown within 2–3 hours</strong> for reported deepfakes and non-consensual intimate imagery</li>
+        <li><strong style="color:#f9f9f9">Takedown within 36 hours</strong> for other reported unlawful content</li>
+        <li>Appointment of a resident Grievance Officer accessible to Indian users</li>
+        <li>Retention of specified user data for 180 days for law enforcement access</li>
+        <li>Monthly compliance reporting as required under the Rules</li>
+        <li>Session expiry after 6 hours in compliance with Telecom Cyber Security Rules, March 2026</li>
+      </ul>
+      <div class="law-card">
+        <h3>Grievance Officer — IT Rules 2021 (Amended 2026)</h3>
+        <p>Name: Ashish Samuel, AnoChat.in<br/>
+        Email: <a href="mailto:loneworld123@gmail.com" style="color:#a89df5">loneworld123@gmail.com</a><br/>
+        Acknowledgment: within 24 hours · Resolution: within 7 days</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>4. Prohibited Conduct</h2>
+      <p>The following actions are strictly prohibited on AnoChat.in and will result in an immediate permanent ban:</p>
+      <ul>
+        <li>Sharing or soliciting personal identifying information of any user</li>
+        <li>Sending spam, phishing links, or malware</li>
+        <li>Impersonating any person or organisation</li>
+        <li>Using automated bots or scripts to interact with the platform</li>
+        <li>Attempting to circumvent bans using alternate accounts or VPNs</li>
+        <li>Any form of sexual content involving or directed at minors</li>
+      </ul>
+      <div class="warning">
+        <p>⚠️ Violations involving minors will be reported to the National Commission for Protection of Child Rights (NCPCR) and law enforcement immediately, without prior notice.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>5. Disclaimer of Warranties</h2>
+      <p>AnoChat.in is provided "as is" without warranties of any kind. We do not guarantee uninterrupted service, the accuracy of information provided by other users, or that the platform is free from harmful content at all times. You use the platform at your own risk.</p>
+    </div>
+
+    <div class="section">
+      <h2>6. Limitation of Liability</h2>
+      <p>To the maximum extent permitted by applicable law, AnoChat.in and its operators shall not be liable for any direct, indirect, incidental, or consequential damages arising from your use of the platform, including any content transmitted by other users.</p>
+    </div>
+
+    <div class="section">
+      <h2>7. Governing Law and Jurisdiction</h2>
+      <p>These Terms are governed by the laws of India. Any dispute arising out of or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts in India. By using AnoChat.in, you consent to this jurisdiction.</p>
+    </div>
+
+    <div class="section">
+      <h2>8. Amendments</h2>
+      <p>We reserve the right to amend these Terms at any time. Continued use of AnoChat.in after any amendment constitutes acceptance of the updated Terms. Material changes will be communicated via a notice on the homepage.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/privacy.html">Privacy Policy</a>
+        <a href="/terms.html">Terms of Service</a>
+        <a href="/safety.html">Safety Guide</a>
+        <a href="mailto:loneworld123@gmail.com">Contact</a>
+      </div>
+      <p class="footer-copy">© 2025 AnoChat.in · Privacy-first anonymous chat · India · Made with ♥</p>
+    </div>
+  </footer>
+</body>
+</html>

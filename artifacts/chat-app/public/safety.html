@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Safety Guide — AnoChat.in</title>
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0f;
+      --card: #0f0f18;
+      --border: rgba(255,255,255,0.07);
+      --primary: #6b5ff8;
+      --accent: #3399ff;
+      --text: #f9f9f9;
+      --muted: #9898a8;
+      --radius: 1rem;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.7;
+    }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      height: 64px;
+      display: flex; align-items: center;
+      padding: 0 2rem;
+      justify-content: space-between;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700; font-size: 1.2rem;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: rgba(107,95,248,0.2);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-icon svg { width: 20px; height: 20px; color: var(--primary); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff; padding: 0.5rem 1.25rem;
+      border-radius: 0.75rem; font-weight: 600; font-size: 0.875rem;
+      border: none; cursor: pointer; text-decoration: none;
+    }
+
+    /* HERO */
+    .page-hero {
+      text-align: center;
+      padding: 4rem 1.5rem 2rem;
+      max-width: 700px; margin: 0 auto;
+    }
+    .page-hero .badge {
+      display: inline-block;
+      background: rgba(107,95,248,0.15);
+      color: #a89df5;
+      font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0.35rem 1rem; border-radius: 2rem;
+      border: 1px solid rgba(107,95,248,0.25);
+      margin-bottom: 1.25rem;
+    }
+    .page-hero h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 800; line-height: 1.2;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #fff 40%, #9898a8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .page-hero p {
+      color: var(--muted); font-size: 1rem; max-width: 520px; margin: 0 auto;
+    }
+
+    /* CONTENT */
+    main {
+      flex: 1;
+      max-width: 800px; width: 100%;
+      margin: 0 auto; padding: 0 1.5rem 4rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem 2rem;
+      margin-bottom: 1rem;
+      display: flex; gap: 1.25rem; align-items: flex-start;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: rgba(107,95,248,0.35); }
+    .card-num {
+      min-width: 40px; height: 40px;
+      border-radius: 0.75rem;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800; font-size: 1rem; color: #fff;
+      flex-shrink: 0;
+    }
+    .card h3 { font-weight: 600; font-size: 1rem; margin-bottom: 0.4rem; }
+    .card p { color: var(--muted); font-size: 0.9rem; line-height: 1.65; }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      background: rgba(15,15,24,0.6);
+      padding: 2.5rem 2rem;
+    }
+    .footer-inner {
+      max-width: 1000px; margin: 0 auto;
+      display: flex; flex-direction: column; align-items: center; gap: 1rem;
+    }
+    .footer-links {
+      display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center;
+    }
+    .footer-links a { color: var(--muted); font-size: 0.85rem; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { color: var(--muted); font-size: 0.8rem; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-brand">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </div>
+      AnoChat
+    </a>
+    <a href="/" class="nav-cta">Start Chatting</a>
+  </nav>
+
+  <div class="page-hero">
+    <div class="badge">Safety First</div>
+    <h1>Your Safety Guide</h1>
+    <p>Five simple rules to keep every conversation safe, respectful, and enjoyable on AnoChat.in.</p>
+  </div>
+
+  <main>
+    <div class="card">
+      <div class="card-num">1</div>
+      <div>
+        <h3>Never Share Personal Information</h3>
+        <p>Do not reveal your real name, phone number, home address, workplace, school, or any social media handles during a chat session. Anonymous connections are only anonymous if you keep them that way. Once shared, personal data cannot be taken back.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-num">2</div>
+      <div>
+        <h3>Report and Block Immediately</h3>
+        <p>If another user sends you inappropriate content, makes you uncomfortable, or violates our community guidelines, use the <strong style="color:#f9f9f9">Block</strong> button in the chat header immediately. You can also report a specific message using the flag icon. Our Grievance Officer reviews all reports within 36 hours (2 hours for urgent cases).</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-num">3</div>
+      <div>
+        <h3>Treat Every Person With Respect</h3>
+        <p>Harassment, hate speech, threats, or any form of abuse are strictly prohibited and will result in an immediate permanent ban. Your IP address is logged and serious violations may be reported to I4C or law enforcement authorities under the Bharatiya Nyaya Sanhita (BNS) 2023.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-num">4</div>
+      <div>
+        <h3>Never Share or Request Images</h3>
+        <p>Do not share or request personal photographs, especially those that can be traced back to your real identity. The sharing of non-consensual intimate imagery (NCII) or AI-generated deepfakes is a criminal offence under IT Rules 2026 and will result in an immediate ban and law enforcement referral.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-num">5</div>
+      <div>
+        <h3>Be Aware of Scams and Manipulation</h3>
+        <p>Be cautious of users who quickly build emotional rapport and then ask for money, gift cards, or personal favours. Do not click links sent by strangers. If a conversation feels engineered or too good to be true, trust your instincts, end the chat, and report the user.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/privacy.html">Privacy Policy</a>
+        <a href="/terms.html">Terms of Service</a>
+        <a href="/safety.html">Safety Guide</a>
+        <a href="mailto:loneworld123@gmail.com">Contact</a>
+      </div>
+      <p class="footer-copy">© 2025 AnoChat.in · Privacy-first anonymous chat · India · Made with ♥</p>
+    </div>
+  </footer>
+
+</body>
+</html>
