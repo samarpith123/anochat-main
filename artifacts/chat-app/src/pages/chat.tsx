@@ -11,7 +11,6 @@ import { format } from "date-fns";
 import { Send, ArrowLeft, Loader2, MessageSquare, Flag, Check, Ban, Clock, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatCountry } from "@/lib/countries";
-import date
 
 const API_BASE = "/api";
 
