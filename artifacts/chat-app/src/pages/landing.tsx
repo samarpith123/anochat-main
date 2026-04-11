@@ -517,36 +517,39 @@ export default function LandingPage() {
             <div>
               <p className="text-xs font-semibold text-foreground uppercase tracking-widest mb-3">Platform</p>
               <ul className="space-y-2">
-                {["How it works", "Features", "Roadmap", "Status"].map(l => (
-                  <li key={l}><span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors">{l}</span></li>
-                ))}
+                <li><a href="/#join" className="text-sm text-muted-foreground hover:text-foreground transition-colors">How it works</a></li>
+                <li><a href="/#faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">FAQ</a></li>
+                <li><span className="text-sm text-muted-foreground/50 cursor-default">Roadmap</span></li>
+                <li><span className="text-sm text-muted-foreground/50 cursor-default">Status</span></li>
               </ul>
             </div>
             {/* Support */}
             <div>
               <p className="text-xs font-semibold text-foreground uppercase tracking-widest mb-3">Support</p>
               <ul className="space-y-2">
-                {["Help Centre", "Safety Tips", "Report Abuse", "Contact Us"].map(l => (
-                  <li key={l}><span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors">{l}</span></li>
-                ))}
+                <li><a href="/safety.html" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Safety Tips</a></li>
+                <li><a href="mailto:loneworld123@gmail.com" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Report Abuse</a></li>
+                <li><a href="mailto:loneworld123@gmail.com" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Contact Us</a></li>
               </ul>
             </div>
             {/* Legal */}
             <div>
               <p className="text-xs font-semibold text-foreground uppercase tracking-widest mb-3">Legal</p>
               <ul className="space-y-2">
-                {["Privacy Policy", "Terms of Service", "IT Rules 2026", "Cookie Policy"].map(l => (
-                  <li key={l}><span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors">{l}</span></li>
-                ))}
+                <li><a href="/privacy.html" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</a></li>
+                <li><a href="/terms.html" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms of Service</a></li>
+                <li><a href="/safety.html" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Safety Guide</a></li>
+                <li><a href="/terms.html#it-rules" className="text-sm text-muted-foreground hover:text-foreground transition-colors">IT Rules 2026</a></li>
               </ul>
             </div>
             {/* Company */}
             <div>
               <p className="text-xs font-semibold text-foreground uppercase tracking-widest mb-3">Company</p>
               <ul className="space-y-2">
-                {["About Us", "Blog", "Careers", "Press"].map(l => (
-                  <li key={l}><span className="text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors">{l}</span></li>
-                ))}
+                <li><a href="/#about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">About Us</a></li>
+                <li><a href="mailto:loneworld123@gmail.com" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Contact</a></li>
+                <li><span className="text-sm text-muted-foreground/50 cursor-default">Blog (soon)</span></li>
+                <li><span className="text-sm text-muted-foreground/50 cursor-default">Careers (soon)</span></li>
               </ul>
             </div>
           </div>
