@@ -195,7 +195,7 @@ export default function ChatPage() {
 
   return (
     <Layout>
-      <div className="flex flex-col h-[calc(100dvh-4rem)] w-full max-w-4xl mx-auto p-0 sm:p-4">
+      <div className="flex flex-col flex-1 w-full max-w-4xl mx-auto p-0 sm:p-4 min-h-0">
         <div className="flex flex-col h-full glass-panel sm:rounded-3xl overflow-hidden border-x-0 sm:border-x">
           
           {/* Chat Header */}

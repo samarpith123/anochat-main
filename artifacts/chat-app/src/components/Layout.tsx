@@ -14,7 +14,7 @@ export function Layout({ children }: LayoutProps) {
   if (!isLoaded) return null;
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden bg-background">
+    <div className="h-screen flex flex-col relative bg-background overflow-hidden">
       {/* Abstract Background Elements */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] bg-accent/10 blur-[120px] rounded-full pointer-events-none" />
@@ -54,7 +54,7 @@ export function Layout({ children }: LayoutProps) {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col relative z-10 w-full max-w-7xl mx-auto">
+      <main className="flex-1 flex flex-col relative z-10 w-full max-w-7xl mx-auto overflow-hidden">
         {children}
       </main>
     </div>
