@@ -11,7 +11,6 @@ import {
 import { cn } from "@/lib/utils";
 
 const ADVISORY_KEY = "itAdvisoryAck";
-const ADVISORY_TTL_MS = 90 * 24 * 60 * 60 * 1000; // 90 days
 
 function CountryDropdown({
   value,
@@ -230,16 +229,14 @@ export default function LandingPage() {
     }
   }, [isLoaded, user, setLocation]);
 
-  // Check advisory acknowledgment (show every 90 days — IT Rules 2026 quarterly requirement)
+  // Show advisory once per session (clears when tab/browser is closed)
   useEffect(() => {
-    const raw = localStorage.getItem(ADVISORY_KEY);
-    if (!raw) { setShowAdvisory(true); return; }
-    const ts = parseInt(raw, 10);
-    if (Date.now() - ts > ADVISORY_TTL_MS) setShowAdvisory(true);
+    const ack = sessionStorage.getItem(ADVISORY_KEY);
+    if (!ack) setShowAdvisory(true);
   }, []);
 
   const handleAdvisoryAccept = () => {
-    localStorage.setItem(ADVISORY_KEY, String(Date.now()));
+    sessionStorage.setItem(ADVISORY_KEY, "1");
     setShowAdvisory(false);
   };
 
