@@ -448,31 +448,6 @@ export default function LandingPage() {
             </form>
           </div>
 
-          {/* Grievance Officer Section (IT Rules 2026 — mandatory public disclosure) */}
-          <div className="mt-4 glass-panel rounded-2xl px-5 py-4 border border-white/5">
-            <div className="flex items-start gap-3">
-              <Shield className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-xs font-semibold text-foreground mb-2">Grievance Officer — IT Rules 2021 (Amended 2026)</p>
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <User className="w-3 h-3 shrink-0" />
-                    <span>Ashish Samuel, Anochat</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Mail className="w-3 h-3 shrink-0" />
-                    <a href="mailto:loneworld123@gmail.com" className="hover:text-foreground transition-colors underline underline-offset-2">
-                      loneworld123@gmail.com
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Clock className="w-3 h-3 shrink-0" />
-                    <span>Acknowledgment within 24 hours · Resolution within 7 days</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </motion.div>
       </div>
       {/* ── About Section ────────────────────────────────────────────────── */}
@@ -528,8 +503,8 @@ export default function LandingPage() {
               <p className="text-xs font-semibold text-foreground uppercase tracking-widest mb-3">Support</p>
               <ul className="space-y-2">
                 <li><a href="/safety.html" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Safety Tips</a></li>
-                <li><a href="mailto:loneworld123@gmail.com" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Report Abuse</a></li>
-                <li><a href="mailto:loneworld123@gmail.com" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Contact Us</a></li>
+                <li><a href="/contact.html" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Grievance Officer</a></li>
+                <li><a href="/contact.html" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Contact Us</a></li>
               </ul>
             </div>
             {/* Legal */}
@@ -547,7 +522,7 @@ export default function LandingPage() {
               <p className="text-xs font-semibold text-foreground uppercase tracking-widest mb-3">Company</p>
               <ul className="space-y-2">
                 <li><a href="/#about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">About Us</a></li>
-                <li><a href="mailto:loneworld123@gmail.com" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Contact</a></li>
+                <li><a href="/contact.html" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Grievance Officer</a></li>
                 <li><span className="text-sm text-muted-foreground/50 cursor-default">Blog (soon)</span></li>
                 <li><span className="text-sm text-muted-foreground/50 cursor-default">Careers (soon)</span></li>
               </ul>
