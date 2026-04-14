@@ -459,7 +459,3 @@ export default function ChatPage() {
     </Layout>
   );
 }
-CHATSX
-
-echo "✓ chat.tsx rewritten"
-cp /home/claude/anochat-inspect/anochat-main/artifacts/chat-app/src/pages/chat.tsx /mnt/user-data/outputs/chat.tsx
