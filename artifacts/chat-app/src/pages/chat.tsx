@@ -80,16 +80,23 @@ export default function ChatPage() {
   const sessionId = user && theirId ? generateSessionId(user.userId, theirId) : "";
   const { data: messagesData, isLoading: isLoadingMessages } = useGetMessages(sessionId, { query: { enabled: !!sessionId } });
 
-  // Cache messages in sessionStorage so they survive a page refresh
+  // Persist all messages to sessionStorage for refresh survival
   useEffect(() => {
-    if (messagesData?.messages?.length && sessionId) {
-      try {
-        sessionStorage.setItem(`messages_${sessionId}`, JSON.stringify(messagesData.messages));
-      } catch {}
-    }
+    if (!sessionId) return;
+    try {
+      const existing = JSON.parse(sessionStorage.getItem(`messages_${sessionId}`) || '[]');
+      const incoming = messagesData?.messages || [];
+      if (!incoming.length) return;
+      // Merge: keep all existing, add new ones not already present
+      const ids = new Set(existing.map((m: any) => m.id));
+      const merged = [...existing, ...incoming.filter((m: any) => !ids.has(m.id))];
+      // Sort by createdAt
+      merged.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      sessionStorage.setItem(`messages_${sessionId}`, JSON.stringify(merged));
+    } catch {}
   }, [messagesData?.messages, sessionId]);
 
-  // Restore cached messages on mount while API loads
+  // Restore full message history from sessionStorage on mount
   const cachedMessages = useMemo(() => {
     if (!sessionId) return [];
     try {
@@ -158,7 +165,12 @@ export default function ChatPage() {
   };
 
   if (!isLoaded || !user || !theirId) return null;
-  const messages = messagesData?.messages?.length ? messagesData.messages : cachedMessages;
+  // Use live data if available, fall back to cache (handles API failures and refresh)
+  const messages = useMemo(() => {
+    const live = messagesData?.messages || [];
+    if (live.length) return live;
+    return cachedMessages;
+  }, [messagesData?.messages, cachedMessages]);
 
   // Avatar initials helper
   const initials = (name: string) => name.substring(0, 2).toUpperCase();
@@ -459,4 +471,3 @@ export default function ChatPage() {
     </Layout>
   );
 }
-

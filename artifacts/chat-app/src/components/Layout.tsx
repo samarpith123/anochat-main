@@ -14,7 +14,7 @@ export function Layout({ children }: LayoutProps) {
   if (!isLoaded) return null;
 
   return (
-    <div className="h-[100dvh] flex flex-col relative bg-background overflow-hidden">
+    <div className="fixed inset-0 flex flex-col bg-background overflow-hidden">
       {/* Abstract Background Elements */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] bg-accent/10 blur-[120px] rounded-full pointer-events-none" />
