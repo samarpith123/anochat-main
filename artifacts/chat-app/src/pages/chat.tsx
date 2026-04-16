@@ -164,13 +164,15 @@ export default function ChatPage() {
     finally { setReportingId(null); setConfirmingId(null); }
   };
 
-  if (!isLoaded || !user || !theirId) return null;
   // Use live data if available, fall back to cache (handles API failures and refresh)
+  // NOTE: must be before early return to follow Rules of Hooks
   const messages = useMemo(() => {
     const live = messagesData?.messages || [];
     if (live.length) return live;
     return cachedMessages;
   }, [messagesData?.messages, cachedMessages]);
+
+  if (!isLoaded || !user || !theirId) return null;
 
   // Avatar initials helper
   const initials = (name: string) => name.substring(0, 2).toUpperCase();
@@ -179,7 +181,7 @@ export default function ChatPage() {
 
   return (
     <Layout>
-      <div className="flex flex-col w-full max-w-4xl mx-auto p-0 sm:p-4" style={{ height: "calc(100dvh - 4rem)" }}>
+      <div className="flex flex-col w-full max-w-4xl mx-auto p-0 sm:p-4" style={{ height: "calc(100dvh - 64px)" }}>
         <div className="flex flex-col h-full sm:rounded-3xl overflow-hidden border border-white/5 bg-card/60 backdrop-blur-xl">
 
           {/* ── Header ─────────────────────────────────────────────────── */}
