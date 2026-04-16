@@ -181,7 +181,7 @@ export default function ChatPage() {
 
   return (
     <Layout>
-      <div className="flex flex-col w-full max-w-4xl mx-auto p-0 sm:p-4" style={{ height: "calc(100dvh - 64px)" }}>
+      <div className="flex flex-col flex-1 w-full max-w-4xl mx-auto p-0 sm:p-4 min-h-0">
         <div className="flex flex-col h-full sm:rounded-3xl overflow-hidden border border-white/5 bg-card/60 backdrop-blur-xl">
 
           {/* ── Header ─────────────────────────────────────────────────── */}
